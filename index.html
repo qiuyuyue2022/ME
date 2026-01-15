@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QiuYuyue随手记</title>
+    <style>
+        body { max-width: 500px; margin: 30px auto; padding: 20px; font-family: -apple-system, system-ui; background: #fafafa; color: #333; }
+        .post { background: #fff; padding: 15px; margin-bottom: 15px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .date { font-size: 12px; color: #999; margin-bottom: 8px; }
+        .content { white-space: pre-wrap; word-wrap: break-word; }
+        h1 { font-size: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <h1>📝 QiuYuyue随手记</h1>
+    <div id="app">加载中...</div>
+
+    <script>
+        const user = 'qiuyuyue2022';
+        const repo = 'ME';
+        
+        // 抓取 GitHub Issues
+        fetch(`https://api.github.com/repos/${user}/${repo}/issues?per_page=100`)
+            .then(res => res.json())
+            .then(data => {
+                const app = document.getElementById('app');
+                app.innerHTML = data.length ? data.map(item => `
+                    <div class="post">
+                        <div class="date">${new Date(item.created_at).toLocaleString()}</div>
+                        <div class="content">${item.body || item.title}</div>
+                    </div>
+                `).join('') : '还没有记过东西哦~';
+            })
+            .catch(() => document.getElementById('app').innerHTML = '加载失败');
+    </script>
+</body>
+</html>
