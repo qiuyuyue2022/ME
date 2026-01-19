@@ -8,6 +8,20 @@
   <!-- marked: Markdown 渲染 -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
+  <!-- MathJax 配置：必须在加载 MathJax 之前 -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script','noscript','style','textarea','pre','code']
+      }
+    };
+  </script>
+  
   <!-- MathJax: LaTeX 公式 -->
   <script id="MathJax-script" async
     src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -226,7 +240,7 @@
       line-height: 1.35;
     }
     .content p{ margin: 10px 0; }
-    .content img{ max-width:100%; border-radius: 12px; border:1px solid var(--cardBorder); }
+    .content img{ max-width: 100%; height: auto; display: block; border-radius: 12px; border: 1px solid var(--cardBorder);}
     .content hr{ border:none; height:1px; background: rgba(255,255,255,.12); margin: 18px 0; }
     @media (prefers-color-scheme: light){
       .content hr{ background: rgba(15,23,42,.10); }
@@ -338,7 +352,7 @@
     const repo = 'ME';
 
     // marked 配置
-    marked.setOptions({ gfm: true, breaks: true });
+    marked.setOptions({ gfm: true, breaks: false });
 
     const app = document.getElementById('app');
     const searchInput = document.getElementById('searchInput');
@@ -395,7 +409,11 @@
       countHint.textContent = `${list.length} 篇`;
 
       // MathJax 渲染
-      if (window.MathJax) MathJax.typeset();
+      if (window.MathJax?.typesetPromise){
+        MathJax.typesetClear([app]);
+        MathJax.typesetPromise([app]);
+      }
+
     }
 
     function filterAndRender(){
