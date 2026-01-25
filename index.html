@@ -27,10 +27,6 @@
     src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
   <style>
-    html{
-    scroll-behavior: smooth;
-    }
-
     :root{
       --bg: #0b0f14;
       --card: rgba(255,255,255,.06);
@@ -320,120 +316,6 @@
       font-size: 12.5px;
       text-align:center;
     }
-
-    /* ===== 全局左侧目录：悬浮覆盖（不占正文宽度） ===== */
-    
-    /* 不再使用双栏布局，正文保持原宽度 */
-    .layout{
-      display: block;
-    }
-    
-    /* 左侧目录改为悬浮面板 */
-    .sidebar{
-      position: fixed;
-      left: 16px;
-      top: 96px; /* 与 topbar 错开 */
-      width: 260px;
-      z-index: 50;
-    
-      border: 1px solid var(--cardBorder);
-      background: color-mix(in srgb, var(--card) 92%, transparent);
-      border-radius: 14px;
-      box-shadow: var(--shadow);
-      padding: 12px;
-    
-      max-height: calc(100vh - 130px);
-      overflow: auto;
-      backdrop-filter: blur(10px);
-    }
-
-    .sidebar.isHidden{
-      display: none;
-    }
-    
-    /* 小屏自动隐藏，避免挡内容 */
-    @media (max-width: 980px){
-      .sidebar{ display:none; }
-    }
-
-    
-    /* 左侧目录栏 */
-    .sidebar{
-      position: sticky;
-      top: 92px; /* 顶部 topbar 高度附近 */
-      align-self: start;
-    
-      border: 1px solid var(--cardBorder);
-      background: var(--card);
-      border-radius: 14px;
-      box-shadow: var(--shadow);
-      padding: 12px;
-    
-      max-height: calc(100vh - 120px);
-      overflow: auto;
-    }
-    
-    .sidebarTitle{
-      font-size: 13px;
-      font-weight: 780;
-      color: var(--muted);
-      margin: 4px 0 10px;
-    }
-    
-    .tocSearch{
-      width: 100%;
-      border: 1px solid var(--cardBorder);
-      background: rgba(255,255,255,.04);
-      color: var(--text);
-      padding: 9px 10px;
-      border-radius: 12px;
-      outline: none;
-      font-size: 13px;
-      margin-bottom: 10px;
-    }
-    
-    @media (prefers-color-scheme: light){
-      .tocSearch{ background: rgba(15,23,42,.03); }
-    }
-    
-    .tocList a{
-      display:block;
-      padding: 8px 10px;
-      border-radius: 12px;
-      color: var(--muted);
-      text-decoration: none;
-      line-height: 1.35;
-    }
-    
-    .tocList a:hover{
-      color: var(--link);
-      background: rgba(255,255,255,.06);
-    }
-    @media (prefers-color-scheme: light){
-      .tocList a:hover{ background: rgba(15,23,42,.05); }
-    }
-    
-    .tocDate{
-      display:block;
-      font-size: 12px;
-      color: var(--muted2);
-      margin-top: 2px;
-    }
-    
-    /* 当前高亮（后面可做 scroll-spy 也用得到） */
-    .tocList a.active{
-      color: var(--text);
-      background: rgba(167,139,250,.14);
-      border: 1px solid rgba(167,139,250,.28);
-    }
-    
-    /* 移动端：隐藏左侧目录，恢复单栏 */
-    @media (max-width: 980px){
-      .layout{ grid-template-columns: 1fr; }
-      .sidebar{ display:none; }
-    }
-
-
   </style>
 </head>
 
@@ -447,7 +329,6 @@
         </div>
         <div class="actions">
           <button class="btn" id="refreshBtn">🔄 刷新</button>
-          <button class="btn" id="tocToggle">📑 目录</button>
           <a class="btn" id="githubBtn" href="#" target="_blank" rel="noreferrer">↗ GitHub</a>
         </div>
       </div>
@@ -459,19 +340,10 @@
     </div>
   </div>
 
-  <div class="wrap layout">
-    <aside class="sidebar">
-      <div class="sidebarTitle">目录</div>
-      <input id="tocSearch" class="tocSearch" placeholder="在目录里搜…" />
-      <div id="toc" class="tocList">—</div>
-    </aside>
-  
-    <main class="main">
-      <div id="app" class="status">加载中…</div>
-      <footer>© <span id="year"></span> · Hosted on GitHub Pages</footer>
-    </main>
+  <div class="wrap">
+    <div id="app" class="status">加载中…</div>
+    <footer>© <span id="year"></span> · Hosted on GitHub Pages</footer>
   </div>
-
 
   <script>
     const user = 'qiuyuyue2022';
@@ -482,11 +354,8 @@
 
     const app = document.getElementById('app');
     const searchInput = document.getElementById('searchInput');
-    const toc = document.getElementById('toc');
-    const tocSearch = document.getElementById('tocSearch');
     const countHint = document.getElementById('countHint');
     const refreshBtn = document.getElementById('refreshBtn');
-    const tocToggle = document.getElementById('tocToggle');
     const githubBtn = document.getElementById('githubBtn');
     document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -521,9 +390,8 @@
         const body = marked.parse(item.body || '');
         const link = item.html_url;
 
-
         return `
-          <article class="post" id="issue-${item.number}">
+          <article class="post">
             <div class="postHead">
               <h2 class="title">${title}</h2>
               <div class="meta">
@@ -534,11 +402,8 @@
             <div class="content">${body || '<em style="color:var(--muted)">（无正文）</em>'}</div>
           </article>
         `;
-
       }).join('');
-      
-      renderToc(list);
-      
+
       countHint.textContent = `${list.length} 篇`;
 
       // MathJax 渲染
@@ -549,30 +414,6 @@
 
     }
 
-    /* ===== 左侧目录（A：文章导航） ===== */
-    function renderToc(list){
-      if (!toc) return;
-    
-      const items = list.map(it => ({
-        id: `issue-${it.number}`,
-        title: it.title || '',
-        date: fmtDate(it.created_at)
-      }));
-    
-      toc.dataset.items = JSON.stringify(items);
-      drawToc(items);
-    }
-    
-    function drawToc(items){
-      if (!toc) return;
-      toc.innerHTML = items.map(x => {
-        return `<a href="#${x.id}">
-          <span class="tocTitle">${escapeHtml(x.title)}</span>
-          <span class="tocDate">${x.date}</span>
-        </a>`;
-      }).join('') || '—';
-    }
-    
     function filterAndRender(){
       const q = (searchInput.value || '').trim().toLowerCase();
       if (!q) return render(allIssues);
@@ -610,25 +451,6 @@
 
     refreshBtn.addEventListener('click', loadIssues);
     searchInput.addEventListener('input', filterAndRender);
-    
-    tocToggle?.addEventListener('click', () => {
-      document.querySelector('.sidebar')?.classList.toggle('isHidden');
-    });
-
-    tocSearch?.addEventListener('input', () => {
-      const raw = toc?.dataset.items;
-      if (!raw) return;
-    
-      const q = (tocSearch.value || '').trim().toLowerCase();
-      const items = JSON.parse(raw);
-    
-      if (!q) return drawToc(items);
-    
-      drawToc(items.filter(x =>
-        (x.title || '').toLowerCase().includes(q) ||
-        (x.date || '').toLowerCase().includes(q)
-      ));
-    });
 
     loadIssues();
   </script>
