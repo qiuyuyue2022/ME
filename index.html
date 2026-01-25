@@ -27,6 +27,10 @@
     src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
   <style>
+    html{
+    scroll-behavior: smooth;
+    }
+
     :root{
       --bg: #0b0f14;
       --card: rgba(255,255,255,.06);
@@ -317,6 +321,92 @@
       text-align:center;
     }
 
+    /* ===== 全局左侧目录布局（A：文章导航） ===== */
+    .layout{
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 16px;
+    }
+    
+    .main{ min-width: 0; }
+    
+    /* 左侧目录栏 */
+    .sidebar{
+      position: sticky;
+      top: 92px; /* 顶部 topbar 高度附近 */
+      align-self: start;
+    
+      border: 1px solid var(--cardBorder);
+      background: var(--card);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 12px;
+    
+      max-height: calc(100vh - 120px);
+      overflow: auto;
+    }
+    
+    .sidebarTitle{
+      font-size: 13px;
+      font-weight: 780;
+      color: var(--muted);
+      margin: 4px 0 10px;
+    }
+    
+    .tocSearch{
+      width: 100%;
+      border: 1px solid var(--cardBorder);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      padding: 9px 10px;
+      border-radius: 12px;
+      outline: none;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+    
+    @media (prefers-color-scheme: light){
+      .tocSearch{ background: rgba(15,23,42,.03); }
+    }
+    
+    .tocList a{
+      display:block;
+      padding: 8px 10px;
+      border-radius: 12px;
+      color: var(--muted);
+      text-decoration: none;
+      line-height: 1.35;
+    }
+    
+    .tocList a:hover{
+      color: var(--link);
+      background: rgba(255,255,255,.06);
+    }
+    @media (prefers-color-scheme: light){
+      .tocList a:hover{ background: rgba(15,23,42,.05); }
+    }
+    
+    .tocDate{
+      display:block;
+      font-size: 12px;
+      color: var(--muted2);
+      margin-top: 2px;
+    }
+    
+    /* 当前高亮（后面可做 scroll-spy 也用得到） */
+    .tocList a.active{
+      color: var(--text);
+      background: rgba(167,139,250,.14);
+      border: 1px solid rgba(167,139,250,.28);
+    }
+    
+    /* 移动端：隐藏左侧目录，恢复单栏 */
+    @media (max-width: 980px){
+      .layout{ grid-template-columns: 1fr; }
+      .sidebar{ display:none; }
+    }
+
+
   </style>
 </head>
 
@@ -341,10 +431,19 @@
     </div>
   </div>
 
-  <div class="wrap">
-    <div id="app" class="status">加载中…</div>
-    <footer>© <span id="year"></span> · Hosted on GitHub Pages</footer>
+  <div class="wrap layout">
+    <aside class="sidebar">
+      <div class="sidebarTitle">目录</div>
+      <input id="tocSearch" class="tocSearch" placeholder="在目录里搜…" />
+      <div id="toc" class="tocList">—</div>
+    </aside>
+  
+    <main class="main">
+      <div id="app" class="status">加载中…</div>
+      <footer>© <span id="year"></span> · Hosted on GitHub Pages</footer>
+    </main>
   </div>
+
 
   <script>
     const user = 'qiuyuyue2022';
@@ -355,6 +454,8 @@
 
     const app = document.getElementById('app');
     const searchInput = document.getElementById('searchInput');
+    const toc = document.getElementById('toc');
+    const tocSearch = document.getElementById('tocSearch');
     const countHint = document.getElementById('countHint');
     const refreshBtn = document.getElementById('refreshBtn');
     const githubBtn = document.getElementById('githubBtn');
@@ -393,7 +494,7 @@
 
 
         return `
-          <article class="post">
+          <article class="post" id="issue-${item.number}">
             <div class="postHead">
               <h2 class="title">${title}</h2>
               <div class="meta">
@@ -407,6 +508,8 @@
 
       }).join('');
       
+      renderToc(list);
+      
       countHint.textContent = `${list.length} 篇`;
 
       // MathJax 渲染
@@ -417,6 +520,30 @@
 
     }
 
+    /* ===== 左侧目录（A：文章导航） ===== */
+    function renderToc(list){
+      if (!toc) return;
+    
+      const items = list.map(it => ({
+        id: `issue-${it.number}`,
+        title: it.title || '',
+        date: fmtDate(it.created_at)
+      }));
+    
+      toc.dataset.items = JSON.stringify(items);
+      drawToc(items);
+    }
+    
+    function drawToc(items){
+      if (!toc) return;
+      toc.innerHTML = items.map(x => {
+        return `<a href="#${x.id}">
+          <span class="tocTitle">${escapeHtml(x.title)}</span>
+          <span class="tocDate">${x.date}</span>
+        </a>`;
+      }).join('') || '—';
+    }
+    
     function filterAndRender(){
       const q = (searchInput.value || '').trim().toLowerCase();
       if (!q) return render(allIssues);
@@ -454,6 +581,21 @@
 
     refreshBtn.addEventListener('click', loadIssues);
     searchInput.addEventListener('input', filterAndRender);
+
+    tocSearch?.addEventListener('input', () => {
+      const raw = toc?.dataset.items;
+      if (!raw) return;
+    
+      const q = (tocSearch.value || '').trim().toLowerCase();
+      const items = JSON.parse(raw);
+    
+      if (!q) return drawToc(items);
+    
+      drawToc(items.filter(x =>
+        (x.title || '').toLowerCase().includes(q) ||
+        (x.date || '').toLowerCase().includes(q)
+      ));
+    });
 
     loadIssues();
   </script>
