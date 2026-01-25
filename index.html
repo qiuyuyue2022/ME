@@ -321,14 +321,41 @@
       text-align:center;
     }
 
-    /* ===== 全局左侧目录布局（A：文章导航） ===== */
+    /* ===== 全局左侧目录：悬浮覆盖（不占正文宽度） ===== */
+    
+    /* 不再使用双栏布局，正文保持原宽度 */
     .layout{
-      display: grid;
-      grid-template-columns: 240px 1fr;
-      gap: 16px;
+      display: block;
     }
     
-    .main{ min-width: 0; }
+    /* 左侧目录改为悬浮面板 */
+    .sidebar{
+      position: fixed;
+      left: 16px;
+      top: 96px; /* 与 topbar 错开 */
+      width: 260px;
+      z-index: 50;
+    
+      border: 1px solid var(--cardBorder);
+      background: color-mix(in srgb, var(--card) 92%, transparent);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 12px;
+    
+      max-height: calc(100vh - 130px);
+      overflow: auto;
+      backdrop-filter: blur(10px);
+    }
+
+    .sidebar.isHidden{
+      display: none;
+    }
+    
+    /* 小屏自动隐藏，避免挡内容 */
+    @media (max-width: 980px){
+      .sidebar{ display:none; }
+    }
+
     
     /* 左侧目录栏 */
     .sidebar{
@@ -420,6 +447,7 @@
         </div>
         <div class="actions">
           <button class="btn" id="refreshBtn">🔄 刷新</button>
+          <button class="btn" id="tocToggle">📑 目录</button>
           <a class="btn" id="githubBtn" href="#" target="_blank" rel="noreferrer">↗ GitHub</a>
         </div>
       </div>
@@ -458,6 +486,7 @@
     const tocSearch = document.getElementById('tocSearch');
     const countHint = document.getElementById('countHint');
     const refreshBtn = document.getElementById('refreshBtn');
+    const tocToggle = document.getElementById('tocToggle');
     const githubBtn = document.getElementById('githubBtn');
     document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -581,6 +610,10 @@
 
     refreshBtn.addEventListener('click', loadIssues);
     searchInput.addEventListener('input', filterAndRender);
+    
+    tocToggle?.addEventListener('click', () => {
+      document.querySelector('.sidebar')?.classList.toggle('isHidden');
+    });
 
     tocSearch?.addEventListener('input', () => {
       const raw = toc?.dataset.items;
