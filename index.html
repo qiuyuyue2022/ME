@@ -316,6 +316,59 @@
       font-size: 12.5px;
       text-align:center;
     }
+
+
+    /* ===== 左侧目录（TOC） ===== */
+
+    /* post 内部两栏布局 */
+    .postBody{
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 18px;
+      padding: 14px 18px 18px;
+    }
+
+    /* 左侧目录本体 */
+    .toc{
+      position: sticky;
+      top: 90px; /* 顶部栏高度 + 余量 */
+      align-self: start;
+      font-size: 13px;
+      color: var(--muted);
+      border-left: 2px solid var(--cardBorder);
+      padding-left: 12px;
+    }
+
+    .toc a{
+      display: block;
+      color: var(--muted);
+      margin: 4px 0;
+      text-decoration: none;
+      line-height: 1.4;
+    }
+
+    .toc a.level-3{
+      margin-left: 12px;
+      font-size: 12.5px;
+    }
+
+    .toc a:hover{
+      color: var(--link);
+    }
+
+    /* 小屏 / 手机：隐藏 TOC */
+    @media (max-width: 900px){
+      .postBody{
+        grid-template-columns: 1fr;
+      }
+      .toc{
+        display: none;
+      }
+      .content{
+        padding: 0;
+      }
+    }
+
   </style>
 </head>
 
@@ -390,6 +443,7 @@
         const body = marked.parse(item.body || '');
         const link = item.html_url;
 
+
         return `
           <article class="post">
             <div class="postHead">
@@ -399,11 +453,35 @@
                 <a class="pill" href="${link}" target="_blank" rel="noreferrer">↗ 在 GitHub 打开</a>
               </div>
             </div>
-            <div class="content">${body || '<em style="color:var(--muted)">（无正文）</em>'}</div>
+            <div class="postBody">
+              <nav class="toc"></nav>
+              <div class="content">${body || '<em style="color:var(--muted)">（无正文）</em>'}</div>
+            </div>
           </article>
         `;
+
       }).join('');
 
+      /* ===== 自动生成 TOC（关键代码） ===== */
+      document.querySelectorAll('.post').forEach((post, postIndex) => {
+        const content = post.querySelector('.content');
+        const toc = post.querySelector('.toc');
+        if (!content || !toc) return;
+    
+        const headers = content.querySelectorAll('h2, h3');
+        if (!headers.length){
+          toc.style.display = 'none';
+          return;
+        }
+    
+        toc.innerHTML = Array.from(headers).map((h, i) => {
+          const level = h.tagName === 'H3' ? 'level-3' : 'level-2';
+          const id = `post-${postIndex}-h-${i}`;
+          h.id = id;
+          return `<a class="${level}" href="#${id}">${h.textContent}</a>`;
+        }).join('');
+      });
+      
       countHint.textContent = `${list.length} 篇`;
 
       // MathJax 渲染
