@@ -1,0 +1,113 @@
+<div class="month-container" id="month-container"></div>
+
+<script>
+  const user = 'qiuyuyue2022';
+  const repo = 'ME';
+
+  const currentMonth = new Date().getMonth() + 1; // 当前月份
+  const monthNames = ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
+  const allIssues = []; // 存储所有的 GitHub Issue
+
+  // 根据创建日期将 Issue 分配到对应月份
+  function groupByMonth(issues) {
+    const grouped = {};
+
+    issues.forEach(issue => {
+      const createdDate = new Date(issue.created_at);
+      const month = createdDate.getMonth(); // 获取月份（0-11）
+      
+      // 确保月份存在
+      if (!grouped[month]) {
+        grouped[month] = [];
+      }
+
+      grouped[month].push(issue);
+    });
+
+    return grouped;
+  }
+
+  // 动态生成每个月的内容
+  function generateMonths(groupedIssues) {
+    const container = document.getElementById("month-container");
+
+    // 生成从七月到当前月份的内容
+    for (let month = 6; month < currentMonth; month++) {
+      const monthElement = document.createElement("div");
+      monthElement.classList.add("month-item");
+
+      const header = document.createElement("div");
+      header.classList.add("month-header");
+      header.onclick = () => toggleDetails(month);
+
+      const title = document.createElement("h2");
+      title.textContent = monthNames[month];
+      header.appendChild(title);
+
+      const details = document.createElement("div");
+      details.id = `month-${month}`;
+      details.classList.add("month-details");
+      details.style.display = "none";
+
+      const content = document.createElement("div");
+      content.classList.add("month-content");
+
+      // 获取并展示每个月的 Issue
+      if (groupedIssues[month]) {
+        content.innerHTML = groupedIssues[month].map(issue => {
+          return `
+            <div class="issue">
+              <h3>${escapeHtml(issue.title)}</h3>
+              <p>${escapeHtml(issue.body?.substring(0, 100))}...</p>
+              <a href="${issue.html_url}" target="_blank">查看详细</a>
+            </div>
+          `;
+        }).join('');
+      } else {
+        content.innerHTML = "<p>没有内容。</p>";
+      }
+
+      details.appendChild(content);
+      monthElement.appendChild(header);
+      monthElement.appendChild(details);
+      container.appendChild(monthElement);
+    }
+  }
+
+  // 切换显示详细内容
+  function toggleDetails(month) {
+    const details = document.getElementById(`month-${month}`);
+    details.style.display = details.style.display === "none" ? "block" : "none";
+  }
+
+  // 从 GitHub 获取 Issues
+  async function loadIssues() {
+    try {
+      const url = `https://api.github.com/repos/${user}/${repo}/issues?per_page=100&state=open&sort=created&direction=desc`;
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (!Array.isArray(data)) throw new Error('Bad response');
+
+      // 排除 PR（GitHub 的 issues API 会混入 PR）
+      const issues = data.filter(x => !x.pull_request);
+
+      // 按月份分组
+      const groupedIssues = groupByMonth(issues);
+      generateMonths(groupedIssues);
+
+    } catch (e) {
+      console.error("加载失败:", e);
+    }
+  }
+
+  // 初始化加载
+  loadIssues();
+
+  // 防止 XSS 注入，转义HTML
+  function escapeHtml(str) {
+    return (str || '').replace(/[&<>"']/g, m => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":"&#39;"
+    }[m]));
+  }
+</script>
