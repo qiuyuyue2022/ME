@@ -1,113 +1,271 @@
-<div class="month-container" id="month-container"></div>
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QiuYuyue · Log</title>
 
-<script>
-  const user = 'qiuyuyue2022';
-  const repo = 'ME';
+  <!-- marked: Markdown 渲染 -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-  const currentMonth = new Date().getMonth() + 1; // 当前月份
-  const monthNames = ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
-  const allIssues = []; // 存储所有的 GitHub Issue
-
-  // 根据创建日期将 Issue 分配到对应月份
-  function groupByMonth(issues) {
-    const grouped = {};
-
-    issues.forEach(issue => {
-      const createdDate = new Date(issue.created_at);
-      const month = createdDate.getMonth(); // 获取月份（0-11）
-      
-      // 确保月份存在
-      if (!grouped[month]) {
-        grouped[month] = [];
+  <!-- MathJax 配置 -->
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script','noscript','style','textarea','pre','code']
       }
+    };
+  </script>
+  
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
-      grouped[month].push(issue);
-    });
+  <style>
+    :root{
+      --bg: #0b0f14;
+      --card: rgba(255,255,255,.06);
+      --cardBorder: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.62);
+      --muted2: rgba(255,255,255,.45);
+      --link: #7dd3fc;
+      --accent: #a78bfa;
+      --codeBg: rgba(255,255,255,.08);
+      --preBg: rgba(255,255,255,.07);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px;
+      --maxw: 860px;
+    }
 
-    return grouped;
-  }
-
-  // 动态生成每个月的内容
-  function generateMonths(groupedIssues) {
-    const container = document.getElementById("month-container");
-
-    // 生成从七月到当前月份的内容
-    for (let month = 6; month < currentMonth; month++) {
-      const monthElement = document.createElement("div");
-      monthElement.classList.add("month-item");
-
-      const header = document.createElement("div");
-      header.classList.add("month-header");
-      header.onclick = () => toggleDetails(month);
-
-      const title = document.createElement("h2");
-      title.textContent = monthNames[month];
-      header.appendChild(title);
-
-      const details = document.createElement("div");
-      details.id = `month-${month}`;
-      details.classList.add("month-details");
-      details.style.display = "none";
-
-      const content = document.createElement("div");
-      content.classList.add("month-content");
-
-      // 获取并展示每个月的 Issue
-      if (groupedIssues[month]) {
-        content.innerHTML = groupedIssues[month].map(issue => {
-          return `
-            <div class="issue">
-              <h3>${escapeHtml(issue.title)}</h3>
-              <p>${escapeHtml(issue.body?.substring(0, 100))}...</p>
-              <a href="${issue.html_url}" target="_blank">查看详细</a>
-            </div>
-          `;
-        }).join('');
-      } else {
-        content.innerHTML = "<p>没有内容。</p>";
+    /* 自动跟随系统浅色 */
+    @media (prefers-color-scheme: light){
+      :root{
+        --bg: #f7f8fb;
+        --card: #ffffff;
+        --cardBorder: rgba(15,23,42,.10);
+        --text: #0f172a;
+        --muted: rgba(15,23,42,.70);
+        --muted2: rgba(15,23,42,.55);
+        --link: #2563eb;
+        --accent: #7c3aed;
+        --codeBg: rgba(148,163,184,.22);
+        --preBg: rgba(148,163,184,.16);
+        --shadow: 0 10px 25px rgba(2,6,23,.10);
       }
-
-      details.appendChild(content);
-      monthElement.appendChild(header);
-      monthElement.appendChild(details);
-      container.appendChild(monthElement);
     }
-  }
 
-  // 切换显示详细内容
-  function toggleDetails(month) {
-    const details = document.getElementById(`month-${month}`);
-    details.style.display = details.style.display === "none" ? "block" : "none";
-  }
-
-  // 从 GitHub 获取 Issues
-  async function loadIssues() {
-    try {
-      const url = `https://api.github.com/repos/${user}/${repo}/issues?per_page=100&state=open&sort=created&direction=desc`;
-      const res = await fetch(url);
-      const data = await res.json();
-
-      if (!Array.isArray(data)) throw new Error('Bad response');
-
-      // 排除 PR（GitHub 的 issues API 会混入 PR）
-      const issues = data.filter(x => !x.pull_request);
-
-      // 按月份分组
-      const groupedIssues = groupByMonth(issues);
-      generateMonths(groupedIssues);
-
-    } catch (e) {
-      console.error("加载失败:", e);
+    *{ box-sizing: border-box; }
+    html,body{ height:100%; }
+    body{
+      background:
+        radial-gradient(1200px 800px at 50% -20%, rgba(255,255,255,0.04), transparent 60%),
+        var(--bg);
     }
-  }
 
-  // 初始化加载
-  loadIssues();
+    a{ color: var(--link); text-decoration: none; }
+    a:hover{ text-decoration: underline; }
 
-  // 防止 XSS 注入，转义HTML
-  function escapeHtml(str) {
-    return (str || '').replace(/[&<>"']/g, m => ({
-      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":"&#39;"
-    }[m]));
-  }
-</script>
+    .wrap{
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 18px 18px 60px;
+    }
+
+    .topbar{
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,0));
+      padding: 14px 0 10px;
+    }
+    @media (prefers-color-scheme: light){
+      .topbar{
+        background: linear-gradient(to bottom, rgba(255,255,255,.75), rgba(255,255,255,0));
+      }
+    }
+
+    .header{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap: 12px;
+    }
+
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+    }
+    .brand h1{
+      margin:0;
+      font-size: 22px;
+      font-weight: 780;
+      letter-spacing: .3px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .brand .sub{
+      margin:0;
+      color: var(--muted);
+      font-size: 13.5px;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+    }
+    .btn{
+      border: 1px solid var(--cardBorder);
+      background: var(--card);
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      cursor:pointer;
+      box-shadow: 0 6px 16px rgba(0,0,0,.10);
+      transition: transform .12s ease, box-shadow .12s ease;
+      user-select:none;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(0,0,0,.14);
+    }
+
+    /* 搜索框 */
+    .searchRow{
+      margin-top: 14px;
+      display:flex;
+      gap: 10px;
+      align-items:center;
+    }
+    .search{
+      flex:1;
+      border: 1px solid var(--cardBorder);
+      background: var(--card);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 14px;
+      outline:none;
+      box-shadow: var(--shadow);
+      font-size: 14px;
+    }
+    .hint{
+      color: var(--muted2);
+      font-size: 12.5px;
+      white-space: nowrap;
+    }
+
+    /* 列表与卡片 */
+    .list{
+      margin-top: 18px;
+      display:flex;
+      flex-direction:column;
+      gap: 14px;
+    }
+
+    .post{
+      border: 1px solid var(--cardBorder);
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .post:hover{
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,0,0,.18);
+    }
+
+    .postHead{
+      padding: 18px 18px 12px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .title{
+      margin:0;
+      font-size: 18px;
+      font-weight: 760;
+      line-height: 1.35;
+      color: var(--text);
+    }
+    .meta{
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12.5px;
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--cardBorder);
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+    }
+
+    .content{
+      padding: 14px 18px 18px;
+      font-size: 15px;
+      line-height: 1.5;
+      max-height: 150px;
+      overflow-y: hidden;
+    }
+    .content.expanded{
+      max-height: none;
+    }
+
+    footer{
+      margin-top: 28px;
+      color: var(--muted2);
+      font-size: 12.5px;
+      text-align:center;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="wrap">
+      <div class="header">
+        <div class="brand">
+          <h1>QiuYuyue · Log</h1>
+          <p class="sub">我们一起用2年的时间，看看我们会走向哪里</p>
+        </div>
+        <div class="actions">
+          <button class="btn" id="refreshBtn">🔄 刷新</button>
+          <a class="btn" id="githubBtn" href="#" target="_blank" rel="noreferrer">↗ GitHub</a>
+        </div>
+      </div>
+
+      <div class="searchRow">
+        <input class="search" id="searchInput" placeholder="搜索标题或正文（本地过滤，不会请求 GitHub）" />
+        <div class="hint" id="countHint">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div id="app" class="status">加载中…</div>
+    <footer>© <span id="year"></span> · Hosted on GitHub Pages</footer>
+  </div>
+
+  <script>
+    // 在此处进行JS调整，处理搜索、加载和展开内容等功能
+  </script>
+</body>
+</html>
