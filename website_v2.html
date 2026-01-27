@@ -24,268 +24,76 @@
   
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
+
   <style>
-    :root{
-      --bg: #0b0f14;
-      --card: rgba(255,255,255,.06);
-      --cardBorder: rgba(255,255,255,.10);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.62);
-      --muted2: rgba(255,255,255,.45);
-      --link: #7dd3fc;
-      --accent: #a78bfa;
-      --codeBg: rgba(255,255,255,.08);
-      --preBg: rgba(255,255,255,.07);
-      --shadow: 0 12px 30px rgba(0,0,0,.35);
-      --radius: 16px;
-      --maxw: 860px;
+    :root {
+      --bg: #0b0f14; --card: rgba(255,255,255,.06); --cardBorder: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92); --muted: rgba(255,255,255,.62); --muted2: rgba(255,255,255,.45);
+      --link: #7dd3fc; --accent: #a78bfa; --codeBg: rgba(255,255,255,.08);
+      --preBg: rgba(255,255,255,.07); --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --radius: 16px; --maxw: 860px;
     }
-
-    /* 自动跟随系统浅色 */
-    @media (prefers-color-scheme: light){
-      :root{
-        --bg: #f7f8fb;
-        --card: #ffffff;
-        --cardBorder: rgba(15,23,42,.10);
-        --text: #0f172a;
-        --muted: rgba(15,23,42,.70);
-        --muted2: rgba(15,23,42,.55);
-        --link: #2563eb;
-        --accent: #7c3aed;
-        --codeBg: rgba(148,163,184,.22);
-        --preBg: rgba(148,163,184,.16);
-        --shadow: 0 10px 25px rgba(2,6,23,.10);
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f7f8fb; --card: #ffffff; --cardBorder: rgba(15,23,42,.10);
+        --text: #0f172a; --muted: rgba(15,23,42,.70); --muted2: rgba(15,23,42,.55);
+        --link: #2563eb; --accent: #7c3aed; --codeBg: rgba(148,163,184,.22);
+        --preBg: rgba(148,163,184,.16); --shadow: 0 10px 25px rgba(2,6,23,.10);
       }
     }
-
-    *{ box-sizing: border-box; }
-    html,body{ height:100%; }
-    body{
-      background:
-        radial-gradient(1200px 800px at 50% -20%, rgba(255,255,255,0.04), transparent 60%),
-        var(--bg);
-    }
-
-    a{ color: var(--link); text-decoration: none; }
-    a:hover{ text-decoration: underline; }
-
-    .wrap{
-      max-width: var(--maxw);
-      margin: 0 auto;
-      padding: 18px 18px 60px;
-    }
-
-    .topbar{
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      backdrop-filter: blur(10px);
-      background: linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,0));
-      padding: 14px 0 10px;
-    }
-    @media (prefers-color-scheme: light){
-      .topbar{
-        background: linear-gradient(to bottom, rgba(255,255,255,.75), rgba(255,255,255,0));
-      }
-    }
-
-    .header{
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap: 12px;
-    }
-
-    .brand{
-      display:flex;
-      flex-direction:column;
-      gap: 6px;
-    }
-    .brand h1{
-      margin:0;
-      font-size: 22px;
-      font-weight: 780;
-      letter-spacing: .3px;
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .brand .sub{
-      margin:0;
-      color: var(--muted);
-      font-size: 13.5px;
-    }
-
-    .actions{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-      justify-content:flex-end;
-    }
-    .btn{
-      border: 1px solid var(--cardBorder);
-      background: var(--card);
-      color: var(--text);
-      padding: 9px 12px;
-      border-radius: 999px;
-      font-size: 13px;
-      cursor:pointer;
-      box-shadow: 0 6px 16px rgba(0,0,0,.10);
-      transition: transform .12s ease, box-shadow .12s ease;
-      user-select:none;
-    }
-    .btn:hover{
-      transform: translateY(-1px);
-      box-shadow: 0 10px 22px rgba(0,0,0,.14);
-    }
-
-    /* 搜索框 */
-    .searchRow{
-      margin-top: 14px;
-      display:flex;
-      gap: 10px;
-      align-items:center;
-    }
-    .search{
-      flex:1;
-      border: 1px solid var(--cardBorder);
-      background: var(--card);
-      color: var(--text);
-      padding: 12px 14px;
-      border-radius: 14px;
-      outline:none;
-      box-shadow: var(--shadow);
-      font-size: 14px;
-    }
-    .hint{
-      color: var(--muted2);
-      font-size: 12.5px;
-      white-space: nowrap;
-    }
-
-    /* 列表与卡片 */
-    .list{
-      margin-top: 18px;
-      display:flex;
-      flex-direction:column;
-      gap: 14px;
-    }
-
-    .post{
-      border: 1px solid var(--cardBorder);
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
-    }
-
-    .post:hover{
-      transform: translateY(-4px);
-      box-shadow: 0 16px 40px rgba(0,0,0,.18);
-    }
-
-    .postHead{
-      padding: 18px 18px 12px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-    }
-    .title{
-      margin:0;
-      font-size: 18px;
-      font-weight: 760;
-      line-height: 1.35;
-      color: var(--text);
-    }
-    .meta{
-      margin-top: 8px;
-      color: var(--muted);
-      font-size: 12.5px;
-      display:flex;
-      gap: 10px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--cardBorder);
-      background: rgba(255,255,255,.04);
-      color: var(--muted);
-    }
-
-    .content {
-      padding: 14px 18px 18px;
-      font-size: 15px;
-      line-height: 1.6;
-      max-height: 200px; /* 初始预览高度 */
+  
+    * { box-sizing: border-box; }
+    body { background: radial-gradient(1200px 800px at 50% -20%, rgba(255,255,255,0.04), transparent 60%), var(--bg); color: var(--text); font-family: system-ui; margin: 0; }
+    a { color: var(--link); text-decoration: none; }
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 18px; }
+  
+    /* Topbar */
+    .topbar { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px); background: linear-gradient(to bottom, rgba(0,0,0,.35), transparent); padding: 14px 0; }
+    @media (prefers-color-scheme: light) { .topbar { background: linear-gradient(to bottom, rgba(255,255,255,.75), transparent); } }
+    .header { display: flex; justify-content: space-between; align-items: center; }
+    .brand h1 { margin: 0; font-size: 22px; }
+    .brand .sub { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+    .btn { border: 1px solid var(--cardBorder); background: var(--card); color: var(--text); padding: 8px 16px; border-radius: 99px; font-size: 13px; cursor: pointer; }
+  
+    /* Search */
+    .searchRow { margin-top: 14px; display: flex; gap: 10px; align-items: center; }
+    .search { flex: 1; border: 1px solid var(--cardBorder); background: var(--card); color: var(--text); padding: 12px; border-radius: 12px; outline: none; }
+  
+    /* Post Card */
+    .post { border: 1px solid var(--cardBorder); background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); margin-top: 16px; cursor: pointer; overflow: hidden; transition: 0.3s; }
+    .postHead { padding: 18px; border-bottom: 1px solid var(--cardBorder); }
+    .title { margin: 0; font-size: 18px; }
+    .pill { display: inline-flex; padding: 4px 10px; border-radius: 99px; border: 1px solid var(--cardBorder); font-size: 12px; color: var(--muted); margin-top: 8px; }
+  
+    /* 文章内容控制核心 */
+    .content { 
+      padding: 18px; font-size: 15px; line-height: 1.6;
+      max-height: 150px; /* 折叠高度 */
       overflow: hidden;
       position: relative;
+      /* 渐变遮罩：只在未展开时显示 */
+      mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+      -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
       transition: max-height 0.5s ease;
     }
-    
-    /* 加上展开后的样式 */
-    .post.expanded .content {
-      max-height: 5000px; /* 足够大的高度 */
-    }
-    
-    /* 加个指示标志，让用户知道能点 */
-    .post { cursor: pointer; position: relative; }
-    .post::after {
-      content: "点击展开 / 收起";
-      display: block;
-      text-align: center;
-      font-size: 12px;
-      color: var(--muted2);
-      padding-bottom: 10px;
-    }
-
-    footer{
-      margin-top: 28px;
-      color: var(--muted2);
-      font-size: 12.5px;
-      text-align:center;
-    }
-
-    /* Markdown 基础美化 */
-    .markdown-body { 
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-      word-wrap: break-word;
-    }
-    .markdown-body pre { 
-      background: var(--preBg); 
-      padding: 12px; 
-      border-radius: 8px; 
-      overflow: auto; 
-    }
-    .markdown-body code { 
-      background: var(--codeBg); 
-      padding: 2px 5px; 
-      border-radius: 4px; 
-      font-family: monospace; 
-    }
-    .markdown-body blockquote {
-      border-left: 4px solid var(--accent);
-      margin: 0;
-      padding-left: 16px;
-      color: var(--muted);
-    }
-    
-    /* 交互样式 */
-    .post { cursor: pointer; transition: all 0.3s; }
-    .content { 
-      max-height: 80px; /* 默认折叠高度 */
-      mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-      transition: max-height 0.4s ease;
-    }
-    .post.is-open .content { 
-      max-height: 5000px; 
+  
+    /* 展开状态逻辑 */
+    .post.expanded .content { 
+      max-height: 10000px; /* 设一个足够大的值确保不被截断 */
       mask-image: none; 
+      -webkit-mask-image: none;
     }
-
+  
+    .post::after {
+      content: "点击查看全文 / 收起";
+      display: block; text-align: center; font-size: 12px; color: var(--muted2); padding: 10px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+  
+    /* Markdown Style */
+    .markdown-body pre { background: var(--preBg); padding: 12px; border-radius: 8px; overflow: auto; }
+    .markdown-body blockquote { border-left: 4px solid var(--accent); padding-left: 16px; color: var(--muted); margin: 0; }
+    .markdown-body img { max-width: 100%; border-radius: 8px; }
   </style>
 </head>
 
