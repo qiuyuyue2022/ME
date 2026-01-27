@@ -235,6 +235,42 @@
       text-align:center;
     }
 
+    /* Markdown 基础美化 */
+    .markdown-body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      word-wrap: break-word;
+    }
+    .markdown-body pre { 
+      background: var(--preBg); 
+      padding: 12px; 
+      border-radius: 8px; 
+      overflow: auto; 
+    }
+    .markdown-body code { 
+      background: var(--codeBg); 
+      padding: 2px 5px; 
+      border-radius: 4px; 
+      font-family: monospace; 
+    }
+    .markdown-body blockquote {
+      border-left: 4px solid var(--accent);
+      margin: 0;
+      padding-left: 16px;
+      color: var(--muted);
+    }
+    
+    /* 交互样式 */
+    .post { cursor: pointer; transition: all 0.3s; }
+    .content { 
+      max-height: 80px; /* 默认折叠高度 */
+      mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+      transition: max-height 0.4s ease;
+    }
+    .post.is-open .content { 
+      max-height: 5000px; 
+      mask-image: none; 
+    }
+
   </style>
 </head>
 
