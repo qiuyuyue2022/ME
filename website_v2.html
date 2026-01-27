@@ -295,11 +295,13 @@
     async function load() {
       $('app').innerText = '加载中...';
       try {
-        const res = await fetch(`https://api.github.com/repos/${CONFIG.repo}/issues?per_page=100`);
+        const res = await fetch(`https://api.github.com/repos/${CONFIG.repo}/issues`);
+        if (!res.ok) throw new Error(`HTTP 错误: ${res.status}`); // 捕捉 404 或 403
         allPosts = await res.json();
         render(allPosts);
       } catch (e) {
-        $('app').innerText = '加载失败，请检查仓库名或网络';
+        $('app').innerText = `加载失败: ${e.message}`;
+        console.error(e);
       }
     }
     
