@@ -265,7 +265,57 @@
   </div>
 
   <script>
-    // 在此处进行JS调整，处理搜索、加载和展开内容等功能
+    const CONFIG = {
+      repo: '你的用户名/仓库名', // ！！！请修改这里，例如 'qiuyuyue2022/blog'
+      year: new Date().getFullYear()
+    };
+    
+    let allPosts = [];
+    const $ = id => document.getElementById(id);
+    
+    // 渲染文章
+    function render(posts) {
+      $('app').innerHTML = posts.map(p => `
+        <div class="post">
+          <div class="postHead">
+            <h2 class="title">${p.title}</h2>
+            <div class="meta">
+              <span class="pill">📅 ${new Date(p.created_at).toLocaleDateString()}</span>
+              ${p.labels.map(l => `<span class="pill"># ${l.name}</span>`).join('')}
+            </div>
+          </div>
+          <div class="content markdown-body">${marked.parse(p.body || '')}</div>
+        </div>
+      `).join('');
+      if(window.MathJax) MathJax.typeset();
+      $('countHint').innerText = `共 ${posts.length} 篇`;
+    }
+    
+    // 加载数据
+    async function load() {
+      $('app').innerText = '加载中...';
+      try {
+        const res = await fetch(`https://api.github.com/repos/${CONFIG.repo}/issues?per_page=100`);
+        allPosts = await res.json();
+        render(allPosts);
+      } catch (e) {
+        $('app').innerText = '加载失败，请检查仓库名或网络';
+      }
+    }
+    
+    // 搜索功能
+    $('searchInput').oninput = (e) => {
+      const val = e.target.value.toLowerCase();
+      render(allPosts.filter(p => 
+        p.title.toLowerCase().includes(val) || p.body.toLowerCase().includes(val)
+      ));
+    };
+    
+    // 初始化
+    $('year').innerText = CONFIG.year;
+    $('githubBtn').href = `https://github.com/${CONFIG.repo}`;
+    $('refreshBtn').onclick = load;
+    load();
   </script>
 </body>
 </html>
