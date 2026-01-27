@@ -217,15 +217,30 @@
       color: var(--muted);
     }
 
-    .content{
+    .content {
       padding: 14px 18px 18px;
       font-size: 15px;
-      line-height: 1.5;
-      max-height: 150px;
-      overflow-y: hidden;
+      line-height: 1.6;
+      max-height: 200px; /* 初始预览高度 */
+      overflow: hidden;
+      position: relative;
+      transition: max-height 0.5s ease;
     }
-    .content.expanded{
-      max-height: none;
+    
+    /* 加上展开后的样式 */
+    .post.expanded .content {
+      max-height: 5000px; /* 足够大的高度 */
+    }
+    
+    /* 加个指示标志，让用户知道能点 */
+    .post { cursor: pointer; position: relative; }
+    .post::after {
+      content: "点击展开 / 收起";
+      display: block;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted2);
+      padding-bottom: 10px;
     }
 
     footer{
@@ -302,75 +317,71 @@
 
   <script>
     const CONFIG = {
-      repo: 'qiuyuyue2022/ME', // 请确保这是你的仓库
+      repo: 'qiuyuyue2022/ME', // 确保这是你的仓库名
       year: new Date().getFullYear()
     };
-    
+  
     const $ = id => document.getElementById(id);
     let allPosts = [];
-    
-    // 核心渲染函数
+  
+    // 1. 获取数据
+    async function load() {
+      $('app').innerHTML = '<div style="text-align:center;padding:20px;">数据加载中...</div>';
+      try {
+        const res = await fetch(`https://api.github.com/repos/${CONFIG.repo}/issues?per_page=100`);
+        if (!res.ok) throw new Error(`仓库未找到或设为了私有 (HTTP ${res.status})`);
+        allPosts = await res.json();
+        render(allPosts);
+      } catch (e) {
+        $('app').innerHTML = `<div style="text-align:center;padding:20px;color:#f87171;">${e.message}</div>`;
+      }
+    }
+  
+    // 2. 渲染页面
     function render(posts) {
-      const container = $('app');
       if (posts.length === 0) {
-        container.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted)">没有找到相关文章</div>';
+        $('app').innerHTML = '<div style="text-align:center;padding:20px;">没有找到文章</div>';
         return;
       }
-    
-      container.innerHTML = posts.map(p => `
-        <div class="post" onclick="togglePost(this)">
+      
+      $('app').innerHTML = posts.map(p => `
+        <article class="post">
           <div class="postHead">
             <h2 class="title">${p.title}</h2>
             <div class="meta">
               <span class="pill">📅 ${new Date(p.created_at).toLocaleDateString()}</span>
-              ${p.labels.map(l => `<span class="pill"># ${l.name}</span>`).join('')}
+              <span class="pill"># Issue ${p.number}</span>
             </div>
           </div>
           <div class="content markdown-body">${marked.parse(p.body || '')}</div>
-        </div>
+        </article>
       `).join('');
-    
-      // 渲染数学公式
-      if (window.MathJax && window.MathJax.typeset) MathJax.typeset();
+      
+      if (window.MathJax) MathJax.typeset();
       $('countHint').innerText = `共 ${posts.length} 篇`;
     }
-    
-    // 切换展开/折叠的逻辑
-    window.togglePost = (el) => {
-      el.classList.toggle('expanded');
-      const content = el.querySelector('.content');
-      // 简洁的切换：如果有 expanded 类就取消高度限制，否则恢复
-      if (el.classList.contains('expanded')) {
-        content.style.maxHeight = 'none';
-        content.style.overflowY = 'visible';
-      } else {
-        content.style.maxHeight = '150px';
-        content.style.overflowY = 'hidden';
+  
+    // 3. 统一处理点击展开/收起
+    document.addEventListener('click', (e) => {
+      const post = e.target.closest('.post');
+      if (post) {
+        post.classList.toggle('expanded');
       }
+    });
+  
+    // 4. 搜索功能
+    $('searchInput').oninput = (e) => {
+      const v = e.target.value.toLowerCase();
+      const filtered = allPosts.filter(p => 
+        p.title.toLowerCase().includes(v) || (p.body && p.body.toLowerCase().includes(v))
+      );
+      render(filtered);
     };
-    
-    // 获取数据
-    async function load() {
-      $('app').innerText = '加载中...';
-      try {
-        const res = await fetch(`https://api.github.com/repos/${CONFIG.repo}/issues?per_page=100`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        allPosts = await res.json();
-        render(allPosts);
-      } catch (e) {
-        $('app').innerHTML = `<div style="color:#f87171">加载失败: ${e.message}</div>`;
-      }
-    }
-    
-    // 初始化
+  
+    // 5. 初始化
     $('year').innerText = CONFIG.year;
     $('refreshBtn').onclick = load;
     $('githubBtn').href = `https://github.com/${CONFIG.repo}`;
-    $('searchInput').oninput = (e) => {
-      const v = e.target.value.toLowerCase();
-      render(allPosts.filter(p => p.title.toLowerCase().includes(v) || p.body.toLowerCase().includes(v)));
-    };
-    
     load();
   </script>
 </body>
