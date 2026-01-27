@@ -21,43 +21,50 @@
       }
     };
   </script>
-  
+
   <!-- MathJax: LaTeX 公式 -->
   <script id="MathJax-script" async
     src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
   <style>
     :root{
+      /* ===== 默认主题：浅色（你要求默认浅色） ===== */
+      --bg: #f7f8fb;
+      --card: #ffffff;
+      --cardBorder: rgba(15,23,42,.10);
+      --text: #0f172a;
+      --muted: rgba(15,23,42,.70);
+      --muted2: rgba(15,23,42,.55);
+
+      /* 蓝色主题 */
+      --link: #2563eb;      /* blue-600 */
+      --accent: #1d4ed8;    /* blue-700 */
+      --accentBg: rgba(29,78,216,.12);
+
+      --codeBg: rgba(148,163,184,.22);
+      --preBg: rgba(148,163,184,.16);
+      --shadow: 0 10px 25px rgba(2,6,23,.10);
+      --radius: 16px;
+      --maxw: 860px;
+    }
+
+    /* ===== 手动切换：深色覆盖 ===== */
+    html[data-theme="dark"]{
       --bg: #0b0f14;
       --card: rgba(255,255,255,.06);
       --cardBorder: rgba(255,255,255,.10);
       --text: rgba(255,255,255,.92);
       --muted: rgba(255,255,255,.62);
       --muted2: rgba(255,255,255,.45);
-      --link: #f9a8d4;      /* 粉色链接（rose-300） */
-      --accent: #ec4899;   /* 主强调色（rose-500） */
+
+      /* 蓝色（暗色里稍微提亮一点更舒服） */
+      --link: #7aa2f7;
+      --accent: #5b8cff;
+      --accentBg: rgba(91,140,255,.14);
+
       --codeBg: rgba(255,255,255,.08);
       --preBg: rgba(255,255,255,.07);
       --shadow: 0 12px 30px rgba(0,0,0,.35);
-      --radius: 16px;
-      --maxw: 860px;
-    }
-
-    /* 自动跟随系统浅色 */
-    @media (prefers-color-scheme: light){
-      :root{
-        --bg: #f7f8fb;
-        --card: #ffffff;
-        --cardBorder: rgba(15,23,42,.10);
-        --text: #0f172a;
-        --muted: rgba(15,23,42,.70);
-        --muted2: rgba(15,23,42,.55);
-        --link: #db2777;
-        --accent: #ec4899;
-        --codeBg: rgba(148,163,184,.22);
-        --preBg: rgba(148,163,184,.16);
-        --shadow: 0 10px 25px rgba(2,6,23,.10);
-      }
     }
 
     *{ box-sizing: border-box; }
@@ -70,6 +77,7 @@
           transparent 60%
         ),
         var(--bg);
+      color: var(--text);
     }
 
     a{ color: var(--link); text-decoration: none; }
@@ -87,13 +95,14 @@
       top: 0;
       z-index: 10;
       backdrop-filter: blur(10px);
-      background: linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,0));
       padding: 14px 0 10px;
     }
-    @media (prefers-color-scheme: light){
-      .topbar{
-        background: linear-gradient(to bottom, rgba(255,255,255,.75), rgba(255,255,255,0));
-      }
+    /* 顶部栏背景：根据当前主题稍微不同 */
+    html:not([data-theme="dark"]) .topbar{
+      background: linear-gradient(to bottom, rgba(255,255,255,.75), rgba(255,255,255,0));
+    }
+    html[data-theme="dark"] .topbar{
+      background: linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,0));
     }
 
     .header{
@@ -189,12 +198,10 @@
 
     .postHead{
       padding: 18px 18px 12px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
+      border-bottom: 1px solid rgba(15,23,42,.08);
     }
-    @media (prefers-color-scheme: light){
-      .postHead{
-        border-bottom: 1px solid rgba(15,23,42,.08);
-      }
+    html[data-theme="dark"] .postHead{
+      border-bottom: 1px solid rgba(255,255,255,.08);
     }
 
     .title{
@@ -220,11 +227,11 @@
       padding: 4px 10px;
       border-radius: 999px;
       border: 1px solid var(--cardBorder);
-      background: rgba(255,255,255,.04);
+      background: rgba(15,23,42,.03);
       color: var(--muted);
     }
-    @media (prefers-color-scheme: light){
-      .pill{ background: rgba(15,23,42,.03); }
+    html[data-theme="dark"] .pill{
+      background: rgba(255,255,255,.04);
     }
 
     .content{
@@ -238,17 +245,28 @@
       line-height: 1.35;
     }
     .content p{ margin: 10px 0; }
-    .content img{ max-width: 100%; height: auto; display: block; border-radius: 12px; border: 1px solid var(--cardBorder);}
-    .content hr{ border:none; height:1px; background: rgba(255,255,255,.12); margin: 18px 0; }
-    @media (prefers-color-scheme: light){
-      .content hr{ background: rgba(15,23,42,.10); }
+    .content img{
+      max-width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 12px;
+      border: 1px solid var(--cardBorder);
+    }
+    .content hr{
+      border:none;
+      height:1px;
+      background: rgba(15,23,42,.10);
+      margin: 18px 0;
+    }
+    html[data-theme="dark"] .content hr{
+      background: rgba(255,255,255,.12);
     }
 
     .content blockquote{
       margin: 12px 0;
       padding: 10px 12px;
       border-left: 4px solid var(--accent);
-      background: rgba(236,72,153,.12);
+      background: var(--accentBg);
       border-radius: 12px;
       color: var(--text);
     }
@@ -286,28 +304,35 @@
     }
     .content th,.content td{
       padding: 10px 12px;
-      border-bottom: 1px solid rgba(255,255,255,.10);
+      border-bottom: 1px solid rgba(15,23,42,.08);
       font-size: 13.5px;
     }
+    html[data-theme="dark"] .content th,
+    html[data-theme="dark"] .content td{
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+
     .content th{
       text-align:left;
       color: var(--muted);
-      background: rgba(255,255,255,.04);
+      background: rgba(15,23,42,.04);
     }
-    @media (prefers-color-scheme: light){
-      .content th{ background: rgba(15,23,42,.04); }
-      .content th,.content td{ border-bottom: 1px solid rgba(15,23,42,.08); }
+    html[data-theme="dark"] .content th{
+      background: rgba(255,255,255,.04);
     }
 
     /* 状态 */
     .status{
       margin: 22px 0;
       border: 1px dashed var(--cardBorder);
-      background: rgba(255,255,255,.04);
+      background: rgba(15,23,42,.03);
       border-radius: 14px;
       padding: 18px;
       color: var(--muted);
       text-align:center;
+    }
+    html[data-theme="dark"] .status{
+      background: rgba(255,255,255,.04);
     }
 
     footer{
@@ -329,6 +354,10 @@
         </div>
         <div class="actions">
           <button class="btn" id="refreshBtn">🔄 刷新</button>
+
+          <!-- 太阳/月亮：纯手动切换（默认浅色） -->
+          <button class="btn" id="themeToggle" aria-label="切换深浅色" title="切换深浅色">🌙</button>
+
           <a class="btn" id="githubBtn" href="#" target="_blank" rel="noreferrer">↗ GitHub</a>
         </div>
       </div>
@@ -357,8 +386,9 @@
     const countHint = document.getElementById('countHint');
     const refreshBtn = document.getElementById('refreshBtn');
     const githubBtn = document.getElementById('githubBtn');
-    document.getElementById('year').textContent = new Date().getFullYear();
+    const themeToggle = document.getElementById('themeToggle');
 
+    document.getElementById('year').textContent = new Date().getFullYear();
     githubBtn.href = `https://github.com/${user}/${repo}/issues`;
 
     let allIssues = [];
@@ -411,7 +441,6 @@
         MathJax.typesetClear([app]);
         MathJax.typesetPromise([app]);
       }
-
     }
 
     function filterAndRender(){
@@ -452,6 +481,41 @@
     refreshBtn.addEventListener('click', loadIssues);
     searchInput.addEventListener('input', filterAndRender);
 
+    // ===== 纯手动主题切换（默认浅色） =====
+    const THEME_KEY = 'qylog_theme'; // 'light' | 'dark'
+    function getDefaultTheme(){ return 'light'; }
+
+    function applyTheme(theme){
+      if (theme === 'dark'){
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }else{
+        document.documentElement.removeAttribute('data-theme'); // 浅色作为默认
+      }
+      updateThemeIcon(theme);
+    }
+
+    function updateThemeIcon(theme){
+      const isLight = (theme === 'light');
+      // 浅色显示🌙（点了去深色），深色显示☀️（点了去浅色）
+      themeToggle.textContent = isLight ? '🌙' : '☀️';
+      themeToggle.title = isLight ? '切换到深色' : '切换到浅色';
+    }
+
+    function initTheme(){
+      const saved = localStorage.getItem(THEME_KEY);
+      const theme = (saved === 'dark' || saved === 'light') ? saved : getDefaultTheme();
+      applyTheme(theme);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const saved = localStorage.getItem(THEME_KEY);
+      const current = (saved === 'dark' || saved === 'light') ? saved : getDefaultTheme();
+      const next = (current === 'light') ? 'dark' : 'light';
+      localStorage.setItem(THEME_KEY, next);
+      applyTheme(next);
+    });
+
+    initTheme();
     loadIssues();
   </script>
 </body>
