@@ -6,9 +6,9 @@
   <title>QiuYuyue · Log</title>
 
   <!-- marked: Markdown 渲染 -->
-  <script src="https://qiuyuyue2022.github.io/ME/js/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-  <!-- MathJax 配置 -->
+  <!-- MathJax 配置：必须在加载 MathJax 之前 -->
   <script>
     window.MathJax = {
       tex: {
@@ -21,79 +21,511 @@
       }
     };
   </script>
-  
-  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
+  <!-- MathJax: LaTeX 公式 -->
+  <script id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
   <style>
-    :root {
-      --bg: #0b0f14; --card: rgba(255,255,255,.06); --cardBorder: rgba(255,255,255,.10);
-      --text: rgba(255,255,255,.92); --muted: rgba(255,255,255,.62); --muted2: rgba(255,255,255,.45);
-      --link: #7dd3fc; --accent: #a78bfa; --codeBg: rgba(255,255,255,.08);
-      --preBg: rgba(255,255,255,.07); --shadow: 0 12px 30px rgba(0,0,0,.35);
-      --radius: 16px; --maxw: 860px;
+    :root{
+      --bg: #f7f8fb;
+      --card: #ffffff;
+      --cardBorder: rgba(15,23,42,.10);
+      --text: #0f172a;
+      --muted: rgba(15,23,42,.70);
+      --muted2: rgba(15,23,42,.55);
+
+      --link: #2563eb;
+      --accent: #1d4ed8;
+      --accentBg: rgba(29,78,216,.12);
+
+      --codeBg: rgba(148,163,184,.22);
+      --preBg: rgba(148,163,184,.16);
+      --shadow: 0 10px 25px rgba(2,6,23,.10);
+      --radius: 16px;
+
+      /* 改大整体宽度，让中间正文更舒展 */
+      --wrapMax: 1320px;
+
+      /* 主内容与目录栏宽度 */
+      --mainMin: 0;
+      --tocW: 280px;
     }
-    @media (prefers-color-scheme: light) {
-      :root {
-        --bg: #f7f8fb; --card: #ffffff; --cardBorder: rgba(15,23,42,.10);
-        --text: #0f172a; --muted: rgba(15,23,42,.70); --muted2: rgba(15,23,42,.55);
-        --link: #2563eb; --accent: #7c3aed; --codeBg: rgba(148,163,184,.22);
-        --preBg: rgba(148,163,184,.16); --shadow: 0 10px 25px rgba(2,6,23,.10);
+
+    html[data-theme="dark"]{
+      --bg: #0b0f14;
+      --card: rgba(255,255,255,.06);
+      --cardBorder: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.62);
+      --muted2: rgba(255,255,255,.45);
+
+      --link: #7aa2f7;
+      --accent: #5b8cff;
+      --accentBg: rgba(91,140,255,.14);
+
+      --codeBg: rgba(255,255,255,.08);
+      --preBg: rgba(255,255,255,.07);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+    }
+
+    *{ box-sizing: border-box; }
+    html{
+      scroll-behavior: smooth;
+    }
+    html,body{ height:100%; }
+    body{
+      margin: 0;
+      background:
+        radial-gradient(
+          1200px 800px at 50% -20%,
+          rgba(255,255,255,0.04),
+          transparent 60%
+        ),
+        var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC",
+                   "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", sans-serif;
+    }
+
+    a{ color: var(--link); text-decoration: none; }
+    a:hover{ text-decoration: underline; }
+
+    .wrap{
+      max-width: var(--wrapMax);
+      margin: 0 auto;
+      padding: 18px 20px 60px;
+    }
+
+    /* 顶部栏 */
+    .topbar{
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(10px);
+      padding: 14px 0 10px;
+    }
+    html:not([data-theme="dark"]) .topbar{
+      background: linear-gradient(to bottom, rgba(255,255,255,.75), rgba(255,255,255,0));
+    }
+    html[data-theme="dark"] .topbar{
+      background: linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,0));
+    }
+
+    .header{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap: 12px;
+    }
+
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap: 6px;
+    }
+    .brand h1{
+      margin:0;
+      font-size: 22px;
+      font-weight: 780;
+      letter-spacing: .3px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .brand .sub{
+      margin:0;
+      color: var(--muted);
+      font-size: 13.5px;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+    }
+    .btn{
+      border: 1px solid var(--cardBorder);
+      background: var(--card);
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      cursor:pointer;
+      box-shadow: 0 6px 16px rgba(0,0,0,.10);
+      transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+      user-select:none;
+    }
+    .btn:hover{
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(0,0,0,.14);
+      text-decoration: none;
+    }
+
+    .searchRow{
+      margin-top: 14px;
+      display:flex;
+      gap: 10px;
+      align-items:center;
+    }
+    .search{
+      flex:1;
+      border: 1px solid var(--cardBorder);
+      background: var(--card);
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 14px;
+      outline:none;
+      box-shadow: var(--shadow);
+      font-size: 14px;
+    }
+    .hint{
+      color: var(--muted2);
+      font-size: 12.5px;
+      white-space: nowrap;
+    }
+
+    /* ===== 主体：正文 + 目录 ===== */
+    .page{
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) var(--tocW);
+      gap: 22px;
+      align-items: start;
+      margin-top: 18px;
+    }
+
+    .mainCol{
+      min-width: var(--mainMin);
+    }
+
+    .asideCol{
+      position: relative;
+    }
+
+    .tocCard{
+      position: sticky;
+      top: 96px;
+      border: 1px solid var(--cardBorder);
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      max-height: calc(100vh - 120px);
+      overflow: auto;
+    }
+
+    .tocTitle{
+      margin: 0 0 10px;
+      font-size: 14px;
+      font-weight: 760;
+      color: var(--text);
+    }
+
+    .tocDesc{
+      margin: 0 0 12px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .toc{
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .tocItem{
+      display: block;
+      padding: 7px 10px;
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      transition: background .12s ease, color .12s ease, transform .12s ease;
+      word-break: break-word;
+    }
+    .tocItem:hover{
+      background: rgba(15,23,42,.05);
+      color: var(--text);
+      text-decoration: none;
+      transform: translateX(1px);
+    }
+    html[data-theme="dark"] .tocItem:hover{
+      background: rgba(255,255,255,.06);
+    }
+
+    .tocItem.level-post{
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 4px;
+    }
+    .tocItem.level-h2{
+      padding-left: 16px;
+    }
+    .tocItem.level-h3{
+      padding-left: 28px;
+      font-size: 12.5px;
+    }
+
+    .tocEmpty{
+      color: var(--muted2);
+      font-size: 13px;
+      line-height: 1.6;
+      padding: 4px 2px;
+    }
+
+    /* 列表与卡片 */
+    .list{
+      display:flex;
+      flex-direction:column;
+      gap: 16px;
+    }
+
+    .post{
+      border: 1px solid var(--cardBorder);
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      scroll-margin-top: 100px;
+    }
+
+    .postHead{
+      padding: 18px 18px 12px;
+      border-bottom: 1px solid rgba(15,23,42,.08);
+    }
+    html[data-theme="dark"] .postHead{
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+
+    .title{
+      margin:0;
+      font-size: 19px;
+      font-weight: 760;
+      line-height: 1.35;
+      color: var(--text);
+    }
+    .title a{
+      color: inherit;
+      text-decoration: none;
+    }
+    .title a:hover{
+      text-decoration: none;
+    }
+
+    .meta{
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12.5px;
+      display:flex;
+      gap: 10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--cardBorder);
+      background: rgba(15,23,42,.03);
+      color: var(--muted);
+    }
+    html[data-theme="dark"] .pill{
+      background: rgba(255,255,255,.04);
+    }
+
+    .content{
+      padding: 14px 18px 18px;
+      font-size: 15px;
+      line-height: 1.8;
+    }
+
+    /* Markdown 内容排版 */
+    .content h1,
+    .content h2,
+    .content h3,
+    .content h4{
+      position: relative;
+      scroll-margin-top: 100px;
+    }
+
+    .content h2{
+      margin: 22px 0 12px;
+      line-height: 1.35;
+      font-size: 21px;
+    }
+    .content h3{
+      margin: 18px 0 10px;
+      line-height: 1.4;
+      font-size: 17px;
+    }
+    .content p{ margin: 10px 0; }
+    .content ul, .content ol{
+      margin: 10px 0 10px 1.3em;
+      padding: 0;
+    }
+    .content li{
+      margin: 6px 0;
+    }
+    .content img{
+      max-width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 12px;
+      border: 1px solid var(--cardBorder);
+      margin: 12px 0;
+    }
+    .content hr{
+      border:none;
+      height:1px;
+      background: rgba(15,23,42,.10);
+      margin: 18px 0;
+    }
+    html[data-theme="dark"] .content hr{
+      background: rgba(255,255,255,.12);
+    }
+
+    .content blockquote{
+      margin: 12px 0;
+      padding: 10px 12px;
+      border-left: 4px solid var(--accent);
+      background: var(--accentBg);
+      border-radius: 12px;
+      color: var(--text);
+    }
+
+    .content code{
+      background: var(--codeBg);
+      padding: .15em .45em;
+      border-radius: 8px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.92em;
+    }
+
+    .content pre{
+      background: var(--preBg);
+      border: 1px solid var(--cardBorder);
+      padding: 14px;
+      border-radius: 14px;
+      overflow:auto;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    .content pre code{
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+      font-size: 13.5px;
+    }
+
+    .content table{
+      width:100%;
+      border-collapse: collapse;
+      overflow:hidden;
+      border-radius: 12px;
+      border: 1px solid var(--cardBorder);
+      margin: 12px 0;
+      display: block;
+      overflow-x: auto;
+    }
+    .content th,.content td{
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(15,23,42,.08);
+      font-size: 13.5px;
+      white-space: nowrap;
+    }
+    html[data-theme="dark"] .content th,
+    html[data-theme="dark"] .content td{
+      border-bottom: 1px solid rgba(255,255,255,.10);
+    }
+
+    .content th{
+      text-align:left;
+      color: var(--muted);
+      background: rgba(15,23,42,.04);
+    }
+    html[data-theme="dark"] .content th{
+      background: rgba(255,255,255,.04);
+    }
+
+    .anchor{
+      opacity: 0;
+      margin-left: 8px;
+      font-size: .85em;
+      color: var(--muted2);
+      transition: opacity .12s ease;
+      vertical-align: middle;
+    }
+    .content h2:hover .anchor,
+    .content h3:hover .anchor{
+      opacity: 1;
+      text-decoration: none;
+    }
+
+    /* 状态 */
+    .status{
+      margin: 10px 0 0;
+      border: 1px dashed var(--cardBorder);
+      background: rgba(15,23,42,.03);
+      border-radius: 14px;
+      padding: 18px;
+      color: var(--muted);
+      text-align:center;
+    }
+    html[data-theme="dark"] .status{
+      background: rgba(255,255,255,.04);
+    }
+
+    footer{
+      margin-top: 28px;
+      color: var(--muted2);
+      font-size: 12.5px;
+      text-align:center;
+    }
+
+    /* 平板/手机：目录移到正文上方 */
+    @media (max-width: 1080px){
+      .page{
+        grid-template-columns: 1fr;
+      }
+      .asideCol{
+        order: -1;
+      }
+      .tocCard{
+        position: static;
+        max-height: none;
       }
     }
-  
-    * { box-sizing: border-box; }
-    body { background: radial-gradient(1200px 800px at 50% -20%, rgba(255,255,255,0.04), transparent 60%), var(--bg); color: var(--text); font-family: system-ui; margin: 0; }
-    a { color: var(--link); text-decoration: none; }
-    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 18px; }
-  
-    /* Topbar */
-    .topbar { position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px); background: linear-gradient(to bottom, rgba(0,0,0,.35), transparent); padding: 14px 0; }
-    @media (prefers-color-scheme: light) { .topbar { background: linear-gradient(to bottom, rgba(255,255,255,.75), transparent); } }
-    .header { display: flex; justify-content: space-between; align-items: center; }
-    .brand h1 { margin: 0; font-size: 22px; }
-    .brand .sub { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
-    .btn { border: 1px solid var(--cardBorder); background: var(--card); color: var(--text); padding: 8px 16px; border-radius: 99px; font-size: 13px; cursor: pointer; }
-  
-    /* Search */
-    .searchRow { margin-top: 14px; display: flex; gap: 10px; align-items: center; }
-    .search { flex: 1; border: 1px solid var(--cardBorder); background: var(--card); color: var(--text); padding: 12px; border-radius: 12px; outline: none; }
-  
-    /* Post Card */
-    .post { border: 1px solid var(--cardBorder); background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); margin-top: 16px; cursor: pointer; overflow: hidden; transition: 0.3s; }
-    .postHead { padding: 18px; border-bottom: 1px solid var(--cardBorder); }
-    .title { margin: 0; font-size: 18px; }
-    .pill { display: inline-flex; padding: 4px 10px; border-radius: 99px; border: 1px solid var(--cardBorder); font-size: 12px; color: var(--muted); margin-top: 8px; }
-  
-    /* 文章内容控制核心 */
-    .content { 
-      padding: 18px; font-size: 15px; line-height: 1.6;
-      max-height: 150px; /* 折叠高度 */
-      overflow: hidden;
-      position: relative;
-      /* 渐变遮罩：只在未展开时显示 */
-      mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
-      -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
-      transition: max-height 0.5s ease;
+
+    @media (max-width: 640px){
+      .wrap{
+        padding: 14px 14px 48px;
+      }
+      .header{
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .actions{
+        width: 100%;
+        justify-content: flex-start;
+      }
+      .searchRow{
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .hint{
+        white-space: normal;
+      }
+      .content{
+        font-size: 14.5px;
+      }
+      .title{
+        font-size: 17px;
+      }
     }
-  
-    /* 展开状态逻辑 */
-    .post.expanded .content { 
-      max-height: 10000px; /* 设一个足够大的值确保不被截断 */
-      mask-image: none; 
-      -webkit-mask-image: none;
-    }
-  
-    .post::after {
-      content: "点击查看全文 / 收起";
-      display: block; text-align: center; font-size: 12px; color: var(--muted2); padding: 10px;
-      border-top: 1px solid rgba(255,255,255,0.05);
-    }
-  
-    /* Markdown Style */
-    .markdown-body pre { background: var(--preBg); padding: 12px; border-radius: 8px; overflow: auto; }
-    .markdown-body blockquote { border-left: 4px solid var(--accent); padding-left: 16px; color: var(--muted); margin: 0; }
-    .markdown-body img { max-width: 100%; border-radius: 8px; }
   </style>
 </head>
 
@@ -107,6 +539,7 @@
         </div>
         <div class="actions">
           <button class="btn" id="refreshBtn">🔄 刷新</button>
+          <button class="btn" id="themeToggle" aria-label="切换深浅色" title="切换深浅色">🌙</button>
           <a class="btn" id="githubBtn" href="#" target="_blank" rel="noreferrer">↗ GitHub</a>
         </div>
       </div>
@@ -119,78 +552,261 @@
   </div>
 
   <div class="wrap">
-    <div id="app" class="status">加载中…</div>
+    <div class="page">
+      <main class="mainCol">
+        <div id="app" class="status">加载中…</div>
+      </main>
+
+      <aside class="asideCol">
+        <div class="tocCard">
+          <h2 class="tocTitle">目录</h2>
+          <p class="tocDesc">自动提取文章标题和正文中的二、三级标题。</p>
+          <nav id="toc" class="toc">
+            <div class="tocEmpty">加载后这里会显示结构化目录。</div>
+          </nav>
+        </div>
+      </aside>
+    </div>
+
     <footer>© <span id="year"></span> · Hosted on GitHub Pages</footer>
   </div>
 
   <script>
-    const CONFIG = {
-      repo: 'qiuyuyue2022/ME', // 确保这是你的仓库名
-      year: new Date().getFullYear()
-    };
-  
-    const $ = id => document.getElementById(id);
-    let allPosts = [];
-  
-    // 1. 获取数据
-    async function load() {
-      $('app').innerHTML = '<div style="text-align:center;padding:20px;">数据加载中...</div>';
-      try {
-        const res = await fetch(`https://api.github.com/repos/${CONFIG.repo}/issues?per_page=100`);
-        if (!res.ok) throw new Error(`仓库未找到或设为了私有 (HTTP ${res.status})`);
-        allPosts = await res.json();
-        render(allPosts);
-      } catch (e) {
-        $('app').innerHTML = `<div style="text-align:center;padding:20px;color:#f87171;">${e.message}</div>`;
+    const user = 'qiuyuyue2022';
+    const repo = 'ME';
+
+    marked.setOptions({ gfm: true, breaks: false });
+
+    const app = document.getElementById('app');
+    const toc = document.getElementById('toc');
+    const searchInput = document.getElementById('searchInput');
+    const countHint = document.getElementById('countHint');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const githubBtn = document.getElementById('githubBtn');
+    const themeToggle = document.getElementById('themeToggle');
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+    githubBtn.href = `https://github.com/${user}/${repo}/issues`;
+
+    let allIssues = [];
+
+    function fmtDate(iso){
+      const d = new Date(iso);
+      return d.toLocaleDateString('zh-CN', {
+        year:'numeric',
+        month:'2-digit',
+        day:'2-digit'
+      });
+    }
+
+    function escapeHtml(str){
+      return (str || '').replace(/[&<>"']/g, m => ({
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#39;'
+      }[m]));
+    }
+
+    function slugify(str){
+      return String(str || '')
+        .toLowerCase()
+        .trim()
+        .replace(/<[^>]+>/g, '')
+        .replace(/[^\w\u4e00-\u9fa5\- ]+/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/\-+/g, '-')
+        .replace(/^\-|\-$/g, '') || 'section';
+    }
+
+    function createPostId(item, index){
+      const n = item.number || (index + 1);
+      return `post-${n}`;
+    }
+
+    function buildTOC(){
+      const posts = app.querySelectorAll('.post');
+      const tocItems = [];
+
+      posts.forEach(post => {
+        const postId = post.id;
+        const postTitleEl = post.querySelector('.title');
+        const postTitle = postTitleEl ? postTitleEl.textContent.trim() : '未命名文章';
+
+        tocItems.push(`
+          <a class="tocItem level-post" href="#${postId}">
+            ${escapeHtml(postTitle)}
+          </a>
+        `);
+
+        const headings = post.querySelectorAll('.content h2, .content h3');
+        headings.forEach(h => {
+          const level = h.tagName.toLowerCase();
+          const text = h.textContent.replace(/^#+\s*/, '').trim();
+          if (!text) return;
+
+          tocItems.push(`
+            <a class="tocItem level-${level}" href="#${h.id}">
+              ${escapeHtml(text)}
+            </a>
+          `);
+        });
+      });
+
+      if (!tocItems.length){
+        toc.innerHTML = `<div class="tocEmpty">当前没有可显示的目录。</div>`;
+      } else {
+        toc.innerHTML = tocItems.join('');
       }
     }
-  
-    // 2. 渲染页面
-    function render(posts) {
-      if (posts.length === 0) {
-        $('app').innerHTML = '<div style="text-align:center;padding:20px;">没有找到文章</div>';
+
+    function attachHeadingIds(){
+      const posts = app.querySelectorAll('.post');
+
+      posts.forEach((post, postIndex) => {
+        const postId = post.id || `post-${postIndex + 1}`;
+        const headings = post.querySelectorAll('.content h2, .content h3');
+
+        headings.forEach((h, idx) => {
+          const text = h.textContent.trim();
+          const hid = `${postId}-${slugify(text)}-${idx + 1}`;
+          h.id = hid;
+
+          const anchor = document.createElement('a');
+          anchor.href = `#${hid}`;
+          anchor.className = 'anchor';
+          anchor.textContent = '#';
+          anchor.setAttribute('aria-label', `定位到 ${text}`);
+          h.appendChild(anchor);
+        });
+      });
+    }
+
+    async function render(list){
+      if (!list.length){
+        app.className = "status";
+        app.innerHTML = '还没有记过东西哦～（去 GitHub Issues 新建一条试试）';
+        countHint.textContent = "0 篇";
+        toc.innerHTML = '<div class="tocEmpty">当前没有可显示的目录。</div>';
         return;
       }
-      
-      $('app').innerHTML = posts.map(p => `
-        <article class="post">
-          <div class="postHead">
-            <h2 class="title">${p.title}</h2>
-            <div class="meta">
-              <span class="pill">📅 ${new Date(p.created_at).toLocaleDateString()}</span>
-              <span class="pill"># Issue ${p.number}</span>
+
+      app.className = "list";
+      app.innerHTML = list.map((item, index) => {
+        const title = escapeHtml(item.title);
+        const date = fmtDate(item.created_at);
+        const body = marked.parse(item.body || '');
+        const link = item.html_url;
+        const postId = createPostId(item, index);
+
+        return `
+          <article class="post" id="${postId}">
+            <div class="postHead">
+              <h2 class="title">
+                <a href="#${postId}">${title}</a>
+              </h2>
+              <div class="meta">
+                <span class="pill">📅 ${date}</span>
+                <a class="pill" href="${link}" target="_blank" rel="noreferrer">↗ 在 GitHub 打开</a>
+              </div>
             </div>
-          </div>
-          <div class="content markdown-body">${marked.parse(p.body || '')}</div>
-        </article>
-      `).join('');
-      
-      if (window.MathJax) MathJax.typeset();
-      $('countHint').innerText = `共 ${posts.length} 篇`;
-    }
-  
-    // 3. 统一处理点击展开/收起
-    document.addEventListener('click', (e) => {
-      const post = e.target.closest('.post');
-      if (post) {
-        post.classList.toggle('expanded');
+            <div class="content">${body || '<em style="color:var(--muted)">（无正文）</em>'}</div>
+          </article>
+        `;
+      }).join('');
+
+      countHint.textContent = `${list.length} 篇`;
+
+      attachHeadingIds();
+
+      if (window.MathJax?.typesetPromise){
+        MathJax.typesetClear([app]);
+        await MathJax.typesetPromise([app]);
       }
-    });
-  
-    // 4. 搜索功能
-    $('searchInput').oninput = (e) => {
-      const v = e.target.value.toLowerCase();
-      const filtered = allPosts.filter(p => 
-        p.title.toLowerCase().includes(v) || (p.body && p.body.toLowerCase().includes(v))
-      );
+
+      buildTOC();
+    }
+
+    function filterAndRender(){
+      const q = (searchInput.value || '').trim().toLowerCase();
+      if (!q){
+        render(allIssues);
+        return;
+      }
+
+      const filtered = allIssues.filter(it => {
+        const t = (it.title || '').toLowerCase();
+        const b = (it.body || '').toLowerCase();
+        return t.includes(q) || b.includes(q);
+      });
+
       render(filtered);
-    };
-  
-    // 5. 初始化
-    $('year').innerText = CONFIG.year;
-    $('refreshBtn').onclick = load;
-    $('githubBtn').href = `https://github.com/${CONFIG.repo}`;
-    load();
+    }
+
+    async function loadIssues(){
+      app.className = "status";
+      app.innerHTML = "正在从 GitHub 拉取 Issues…";
+      countHint.textContent = "—";
+      toc.innerHTML = '<div class="tocEmpty">正在生成目录…</div>';
+
+      try{
+        const url = `https://api.github.com/repos/${user}/${repo}/issues?per_page=100&state=open&sort=created&direction=desc`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!Array.isArray(data)) throw new Error('Bad response');
+
+        allIssues = data.filter(x => !x.pull_request);
+        await render(allIssues);
+      }catch(e){
+        app.className = "status";
+        app.innerHTML = '<span style="color:#ef4444;">加载失败</span>：请检查网络、仓库名、或是否触发 GitHub API 频率限制（可稍后重试）。';
+        toc.innerHTML = '<div class="tocEmpty">目录加载失败。</div>';
+      }
+    }
+
+    refreshBtn.addEventListener('click', loadIssues);
+    searchInput.addEventListener('input', filterAndRender);
+
+    // ===== 纯手动主题切换（默认浅色） =====
+    const THEME_KEY = 'qylog_theme';
+
+    function getDefaultTheme(){
+      return 'light';
+    }
+
+    function applyTheme(theme){
+      if (theme === 'dark'){
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }else{
+        document.documentElement.removeAttribute('data-theme');
+      }
+      updateThemeIcon(theme);
+    }
+
+    function updateThemeIcon(theme){
+      const isLight = (theme === 'light');
+      themeToggle.textContent = isLight ? '🌙' : '☀️';
+      themeToggle.title = isLight ? '切换到深色' : '切换到浅色';
+    }
+
+    function initTheme(){
+      const saved = localStorage.getItem(THEME_KEY);
+      const theme = (saved === 'dark' || saved === 'light') ? saved : getDefaultTheme();
+      applyTheme(theme);
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const saved = localStorage.getItem(THEME_KEY);
+      const current = (saved === 'dark' || saved === 'light') ? saved : getDefaultTheme();
+      const next = (current === 'light') ? 'dark' : 'light';
+      localStorage.setItem(THEME_KEY, next);
+      applyTheme(next);
+    });
+
+    initTheme();
+    loadIssues();
   </script>
 </body>
 </html>
