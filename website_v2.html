@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>QiuYuyue · Log</title>
 
-  <!-- marked: Markdown 渲染 -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-  <!-- MathJax 配置：必须在加载 MathJax 之前 -->
   <script>
     window.MathJax = {
       tex: {
@@ -22,7 +20,6 @@
     };
   </script>
 
-  <!-- MathJax: LaTeX 公式 -->
   <script id="MathJax-script" async
     src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
@@ -44,12 +41,9 @@
       --shadow: 0 10px 25px rgba(2,6,23,.10);
       --radius: 16px;
 
-      /* 改大整体宽度，让中间正文更舒展 */
       --wrapMax: 1320px;
-
-      /* 主内容与目录栏宽度 */
-      --mainMin: 0;
-      --tocW: 280px;
+      --tocW: 300px;
+      --stickyTop: 96px;
     }
 
     html[data-theme="dark"]{
@@ -70,9 +64,7 @@
     }
 
     *{ box-sizing: border-box; }
-    html{
-      scroll-behavior: smooth;
-    }
+    html{ scroll-behavior: smooth; }
     html,body{ height:100%; }
     body{
       margin: 0;
@@ -97,7 +89,6 @@
       padding: 18px 20px 60px;
     }
 
-    /* 顶部栏 */
     .topbar{
       position: sticky;
       top: 0;
@@ -106,7 +97,7 @@
       padding: 14px 0 10px;
     }
     html:not([data-theme="dark"]) .topbar{
-      background: linear-gradient(to bottom, rgba(255,255,255,.75), rgba(255,255,255,0));
+      background: linear-gradient(to bottom, rgba(255,255,255,.78), rgba(255,255,255,0));
     }
     html[data-theme="dark"] .topbar{
       background: linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,0));
@@ -187,7 +178,6 @@
       white-space: nowrap;
     }
 
-    /* ===== 主体：正文 + 目录 ===== */
     .page{
       display: grid;
       grid-template-columns: minmax(0, 1fr) var(--tocW);
@@ -196,24 +186,19 @@
       margin-top: 18px;
     }
 
-    .mainCol{
-      min-width: var(--mainMin);
-    }
-
-    .asideCol{
-      position: relative;
-    }
+    .mainCol{ min-width: 0; }
+    .asideCol{ min-width: 0; }
 
     .tocCard{
       position: sticky;
-      top: 96px;
+      top: var(--stickyTop);
       border: 1px solid var(--cardBorder);
       background: var(--card);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: 14px;
-      max-height: calc(100vh - 120px);
-      overflow: auto;
+      max-height: calc(100vh - var(--stickyTop) - 24px);
+      overflow: hidden;
     }
 
     .tocTitle{
@@ -234,6 +219,10 @@
       display: flex;
       flex-direction: column;
       gap: 2px;
+      overflow: auto;
+      max-height: calc(100vh - var(--stickyTop) - 90px);
+      padding-right: 4px;
+      scroll-behavior: smooth;
     }
 
     .tocItem{
@@ -261,12 +250,16 @@
       color: var(--text);
       margin-top: 4px;
     }
-    .tocItem.level-h2{
-      padding-left: 16px;
-    }
+    .tocItem.level-h2{ padding-left: 16px; }
     .tocItem.level-h3{
-      padding-left: 28px;
+      padding-left: 30px;
       font-size: 12.5px;
+    }
+
+    .tocItem.active{
+      background: var(--accentBg);
+      color: var(--accent);
+      font-weight: 700;
     }
 
     .tocEmpty{
@@ -276,7 +269,6 @@
       padding: 4px 2px;
     }
 
-    /* 列表与卡片 */
     .list{
       display:flex;
       flex-direction:column;
@@ -289,7 +281,7 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       overflow:hidden;
-      scroll-margin-top: 100px;
+      scroll-margin-top: 108px;
     }
 
     .postHead{
@@ -309,9 +301,6 @@
     }
     .title a{
       color: inherit;
-      text-decoration: none;
-    }
-    .title a:hover{
       text-decoration: none;
     }
 
@@ -344,13 +333,12 @@
       line-height: 1.8;
     }
 
-    /* Markdown 内容排版 */
     .content h1,
     .content h2,
     .content h3,
     .content h4{
       position: relative;
-      scroll-margin-top: 100px;
+      scroll-margin-top: 108px;
     }
 
     .content h2{
@@ -368,9 +356,7 @@
       margin: 10px 0 10px 1.3em;
       padding: 0;
     }
-    .content li{
-      margin: 6px 0;
-    }
+    .content li{ margin: 6px 0; }
     .content img{
       max-width: 100%;
       height: auto;
@@ -465,7 +451,6 @@
       text-decoration: none;
     }
 
-    /* 状态 */
     .status{
       margin: 10px 0 0;
       border: 1px dashed var(--cardBorder);
@@ -486,7 +471,6 @@
       text-align:center;
     }
 
-    /* 平板/手机：目录移到正文上方 */
     @media (max-width: 1080px){
       .page{
         grid-template-columns: 1fr;
@@ -497,13 +481,15 @@
       .tocCard{
         position: static;
         max-height: none;
+        overflow: visible;
+      }
+      .toc{
+        max-height: 320px;
       }
     }
 
     @media (max-width: 640px){
-      .wrap{
-        padding: 14px 14px 48px;
-      }
+      .wrap{ padding: 14px 14px 48px; }
       .header{
         align-items: flex-start;
         flex-direction: column;
@@ -519,12 +505,8 @@
       .hint{
         white-space: normal;
       }
-      .content{
-        font-size: 14.5px;
-      }
-      .title{
-        font-size: 17px;
-      }
+      .content{ font-size: 14.5px; }
+      .title{ font-size: 17px; }
     }
   </style>
 </head>
@@ -560,7 +542,7 @@
       <aside class="asideCol">
         <div class="tocCard">
           <h2 class="tocTitle">目录</h2>
-          <p class="tocDesc">自动提取文章标题和正文中的二、三级标题。</p>
+          <p class="tocDesc">自动提取文章标题与正文中的二、三级标题，并跟随当前阅读位置高亮。</p>
           <nav id="toc" class="toc">
             <div class="tocEmpty">加载后这里会显示结构化目录。</div>
           </nav>
@@ -589,6 +571,7 @@
     githubBtn.href = `https://github.com/${user}/${repo}/issues`;
 
     let allIssues = [];
+    let headingObserver = null;
 
     function fmtDate(iso){
       const d = new Date(iso);
@@ -625,42 +608,6 @@
       return `post-${n}`;
     }
 
-    function buildTOC(){
-      const posts = app.querySelectorAll('.post');
-      const tocItems = [];
-
-      posts.forEach(post => {
-        const postId = post.id;
-        const postTitleEl = post.querySelector('.title');
-        const postTitle = postTitleEl ? postTitleEl.textContent.trim() : '未命名文章';
-
-        tocItems.push(`
-          <a class="tocItem level-post" href="#${postId}">
-            ${escapeHtml(postTitle)}
-          </a>
-        `);
-
-        const headings = post.querySelectorAll('.content h2, .content h3');
-        headings.forEach(h => {
-          const level = h.tagName.toLowerCase();
-          const text = h.textContent.replace(/^#+\s*/, '').trim();
-          if (!text) return;
-
-          tocItems.push(`
-            <a class="tocItem level-${level}" href="#${h.id}">
-              ${escapeHtml(text)}
-            </a>
-          `);
-        });
-      });
-
-      if (!tocItems.length){
-        toc.innerHTML = `<div class="tocEmpty">当前没有可显示的目录。</div>`;
-      } else {
-        toc.innerHTML = tocItems.join('');
-      }
-    }
-
     function attachHeadingIds(){
       const posts = app.querySelectorAll('.post');
 
@@ -681,6 +628,106 @@
           h.appendChild(anchor);
         });
       });
+    }
+
+    function buildTOC(){
+      const posts = app.querySelectorAll('.post');
+      const tocItems = [];
+
+      posts.forEach(post => {
+        const postId = post.id;
+        const postTitleEl = post.querySelector('.title');
+        const postTitle = postTitleEl ? postTitleEl.textContent.trim() : '未命名文章';
+
+        tocItems.push(`
+          <a class="tocItem level-post" data-target="${postId}" href="#${postId}">
+            ${escapeHtml(postTitle)}
+          </a>
+        `);
+
+        const headings = post.querySelectorAll('.content h2, .content h3');
+        headings.forEach(h => {
+          const level = h.tagName.toLowerCase();
+          const text = h.childNodes[0] ? h.childNodes[0].textContent.trim() : h.textContent.trim();
+          if (!text) return;
+
+          tocItems.push(`
+            <a class="tocItem level-${level}" data-target="${h.id}" href="#${h.id}">
+              ${escapeHtml(text)}
+            </a>
+          `);
+        });
+      });
+
+      if (!tocItems.length){
+        toc.innerHTML = `<div class="tocEmpty">当前没有可显示的目录。</div>`;
+      } else {
+        toc.innerHTML = tocItems.join('');
+      }
+    }
+
+    function setActiveToc(id){
+      const items = toc.querySelectorAll('.tocItem');
+      items.forEach(el => el.classList.remove('active'));
+
+      const active = toc.querySelector(`.tocItem[data-target="${CSS.escape(id)}"]`);
+      if (!active) return;
+
+      active.classList.add('active');
+
+      const tocRect = toc.getBoundingClientRect();
+      const itemRect = active.getBoundingClientRect();
+
+      const isAbove = itemRect.top < tocRect.top + 24;
+      const isBelow = itemRect.bottom > tocRect.bottom - 24;
+
+      if (isAbove || isBelow){
+        active.scrollIntoView({
+          block: 'center',
+          inline: 'nearest',
+          behavior: 'smooth'
+        });
+      }
+    }
+
+    function setupTOCObserver(){
+      if (headingObserver) headingObserver.disconnect();
+
+      const targets = [
+        ...app.querySelectorAll('.post'),
+        ...app.querySelectorAll('.content h2, .content h3')
+      ];
+
+      if (!targets.length) return;
+
+      let visible = [];
+
+      headingObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          const id = entry.target.id;
+          if (!id) return;
+
+          visible = visible.filter(v => v.id !== id);
+
+          if (entry.isIntersecting){
+            visible.push({
+              id,
+              top: entry.boundingClientRect.top
+            });
+          }
+        });
+
+        if (!visible.length) return;
+
+        visible.sort((a, b) => Math.abs(a.top) - Math.abs(b.top));
+        setActiveToc(visible[0].id);
+      }, {
+        root: null,
+        rootMargin: '-120px 0px -55% 0px',
+        threshold: [0, 1]
+      });
+
+      targets.forEach(el => headingObserver.observe(el));
     }
 
     async function render(list){
@@ -726,6 +773,10 @@
       }
 
       buildTOC();
+      setupTOCObserver();
+
+      const first = app.querySelector('.post');
+      if (first) setActiveToc(first.id);
     }
 
     function filterAndRender(){
@@ -769,7 +820,6 @@
     refreshBtn.addEventListener('click', loadIssues);
     searchInput.addEventListener('input', filterAndRender);
 
-    // ===== 纯手动主题切换（默认浅色） =====
     const THEME_KEY = 'qylog_theme';
 
     function getDefaultTheme(){
