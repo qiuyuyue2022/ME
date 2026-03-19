@@ -6,16 +6,23 @@
   <title>QiuYuyue · Log</title>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
   <script>
     window.MathJax = {
-      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] },
-      options: { skipHtmlTags: ['script','noscript','style','textarea','pre','code'] }
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$', '$$'], ['\\[', '\\]']],
+        processEscapes: true
+      },
+      options: {
+        skipHtmlTags: ['script','noscript','style','textarea','pre','code']
+      }
     };
   </script>
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
   <style>
-    :root {
+    :root{
       --bg: #f7f8fb;
       --card: #ffffff;
       --cardBorder: rgba(15,23,42,.10);
@@ -29,119 +36,141 @@
       --preBg: rgba(148,163,184,.16);
       --shadow: 0 10px 25px rgba(2,6,23,.10);
       --radius: 16px;
-      --wrapMax: 1380px;
+      --maxw: 1380px; /* 拓宽容器以容纳目录 */
 
-      /* 布局配置 */
+      /* 目录配置 */
       --tocWidth: 280px;
-      --tocLeft: 30px;
-      --tocTop: 160px; 
-      --mainLeftGap: 340px; 
+      --mainLeftGap: 320px; 
     }
 
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-    body {
+    html[data-theme="dark"]{
+      --bg: #0b0f14;
+      --card: rgba(255,255,255,.06);
+      --cardBorder: rgba(255,255,255,.10);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.62);
+      --muted2: rgba(255,255,255,.45);
+      --link: #7aa2f7;
+      --accent: #5b8cff;
+      --accentBg: rgba(91,140,255,.14);
+      --codeBg: rgba(255,255,255,.08);
+      --preBg: rgba(255,255,255,.07);
+      --shadow: 0 12px 30px rgba(0,0,0,.35);
+    }
+
+    *{ box-sizing: border-box; }
+    html{ scroll-behavior: smooth; }
+    body{
       margin: 0;
       background: radial-gradient(1200px 800px at 50% -20%, rgba(255,255,255,0.04), transparent 60%), var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
-    a { color: var(--link); text-decoration: none; transition: 0.2s; }
-    a:hover { text-decoration: underline; opacity: 0.8; }
+    a{ color: var(--link); text-decoration: none; }
+    a:hover{ text-decoration: underline; }
 
-    .wrap { max-width: var(--wrapMax); margin: 0 auto; padding: 18px 20px 60px; position: relative; }
-
-    /* 顶部栏：修复搜索框下方空白 */
-    .topbar {
-      position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); 
-      padding: 14px 0 2px; /* 压缩底部 padding */
-      background: linear-gradient(to bottom, rgba(255,255,255,.80), rgba(255,255,255,0));
+    /* 布局容器 */
+    .wrap{
+      max-width: var(--maxw);
+      margin: 0 auto;
+      padding: 18px 20px 60px;
+      position: relative;
     }
-    .topbar .wrap { padding-bottom: 0px !important; } /* 强制消除 60px 间距 */
 
-    .header { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
-    .brand h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
-    .brand .sub { margin: 4px 0 0; color: var(--muted); font-size: 13.5px; }
+    /* 顶部栏：修复搜索栏下方空白 */
+    .topbar{
+      position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px);
+      padding: 14px 0 2px; /* 减小底部 padding */
+    }
+    .topbar .wrap { padding-bottom: 10px !important; } /* 关键修复：强制去掉导航栏内的 60px 留白 */
 
-    .btn {
+    html:not([data-theme="dark"]) .topbar{ background: linear-gradient(to bottom, rgba(255,255,255,.75), rgba(255,255,255,0)); }
+    html[data-theme="dark"] .topbar{ background: linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,0)); }
+
+    .header{ display:flex; align-items:flex-end; justify-content:space-between; gap: 12px; }
+    .brand h1{ margin:0; font-size: 22px; font-weight: 780; letter-spacing: .3px; }
+    .brand .sub{ margin:0; color: var(--muted); font-size: 13.5px; }
+    .actions{ display:flex; gap:10px; align-items:center; }
+
+    .btn{
       border: 1px solid var(--cardBorder); background: var(--card); color: var(--text);
-      padding: 8px 14px; border-radius: 999px; font-size: 13px; cursor: pointer;
-      box-shadow: 0 4px 12px rgba(0,0,0,.05); transition: all .15s ease;
+      padding: 9px 12px; border-radius: 999px; font-size: 13px; cursor:pointer;
+      box-shadow: 0 6px 16px rgba(0,0,0,.10); transition: all .12s ease;
     }
-    .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0,0,0,.10); }
+    .btn:hover{ transform: translateY(-1px); box-shadow: 0 10px 22px rgba(0,0,0,.14); }
 
-    .searchRow { margin-top: 14px; display: flex; gap: 10px; align-items: center; padding-bottom: 10px; }
-    .search {
-      flex: 1; border: 1px solid var(--cardBorder); background: var(--card);
-      color: var(--text); padding: 12px 16px; border-radius: 14px; outline: none;
-      box-shadow: var(--shadow); font-size: 14px; transition: border 0.2s;
+    .searchRow{ margin-top: 14px; display:flex; gap: 10px; align-items:center; }
+    .search{
+      flex:1; border: 1px solid var(--cardBorder); background: var(--card);
+      color: var(--text); padding: 12px 14px; border-radius: 14px; outline:none;
+      box-shadow: var(--shadow); font-size: 14px;
     }
-    .search:focus { border-color: var(--link); }
-    .hint { color: var(--muted2); font-size: 12.5px; white-space: nowrap; }
+    .hint{ color: var(--muted2); font-size: 12.5px; white-space: nowrap; }
 
-    /* 正文容器 */
-    .mainWrap { padding-left: var(--mainLeftGap); margin-top: 10px; }
+    /* 主内容区布局 */
+    .mainWrap{ padding-left: var(--mainLeftGap); margin-top: 10px; }
+    .list{ display:flex; flex-direction:column; gap: 14px; }
 
-    .post {
+    .post{
       border: 1px solid var(--cardBorder); background: var(--card);
       border-radius: var(--radius); box-shadow: var(--shadow);
-      overflow: hidden; scroll-margin-top: 100px; margin-bottom: 24px;
+      overflow:hidden; scroll-margin-top: 120px;
     }
-
-    .postHead { padding: 20px 24px 14px; border-bottom: 1px solid rgba(15,23,42,.06); }
-    .title { margin: 0; font-size: 20px; font-weight: 760; line-height: 1.4; color: var(--text); }
+    .postHead{ padding: 18px 18px 12px; border-bottom: 1px solid var(--cardBorder); }
+    .title{ margin:0; font-size: 19px; font-weight: 760; color: var(--text); }
     
-    .meta { margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
-    .pill {
-      display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px;
+    .meta{ margin-top: 8px; color: var(--muted); font-size: 12.5px; display:flex; gap: 10px; align-items:center; }
+    .pill{
+      display:inline-flex; align-items:center; gap: 6px; padding: 4px 10px;
       border-radius: 999px; border: 1px solid var(--cardBorder);
       background: rgba(15,23,42,.03); color: var(--muted); font-size: 12px;
     }
+    html[data-theme="dark"] .pill{ background: rgba(255,255,255,.04); }
 
-    .content { padding: 16px 24px 24px; font-size: 15.5px; line-height: 1.8; color: #334155; }
-    .content h2, .content h3 { color: var(--text); margin: 24px 0 12px; }
-    .content p { margin: 12px 0; }
-    .content blockquote {
-      margin: 16px 0; padding: 12px 16px; border-left: 4px solid var(--accent);
-      background: var(--accentBg); border-radius: 8px; color: var(--text);
+    .content{ padding: 14px 18px 18px; font-size: 15px; line-height: 1.7; }
+    .content blockquote{
+      margin: 12px 0; padding: 10px 12px; border-left: 4px solid var(--accent);
+      background: var(--accentBg); border-radius: 12px;
     }
-    .content pre { background: var(--preBg); padding: 16px; border-radius: 12px; overflow: auto; border: 1px solid var(--cardBorder); }
-    .content code { background: var(--codeBg); padding: .2em .4em; border-radius: 6px; font-size: 0.9em; font-family: monospace; }
-    .content table { width: 100%; border-collapse: collapse; margin: 16px 0; border: 1px solid var(--cardBorder); border-radius: 8px; overflow: hidden; }
-    .content th, .content td { padding: 10px 14px; border-bottom: 1px solid var(--cardBorder); text-align: left; }
-    .content th { background: rgba(15,23,42,.04); font-size: 13px; color: var(--muted); }
+    .content pre{ background: var(--preBg); padding: 14px; border-radius: 14px; overflow:auto; border: 1px solid var(--cardBorder); }
+    .content code{ background: var(--codeBg); padding: .15em .45em; border-radius: 8px; font-size: 0.92em; }
+    .content img{ max-width: 100%; border-radius: 12px; margin: 12px 0; display: block; }
 
     /* 左侧目录样式 */
-    .floatingToc {
-      position: fixed; left: calc((100vw - var(--wrapMax)) / 2 + var(--tocLeft));
-      top: var(--tocTop); width: var(--tocWidth);
-      max-height: calc(100vh - var(--tocTop) - 40px);
+    .floatingToc{
+      position: fixed; width: var(--tocWidth); top: 180px;
+      left: calc((100vw - var(--maxw)) / 2 + 20px);
+      max-height: calc(100vh - 220px);
       border: 1px solid var(--cardBorder); background: var(--card);
       border-radius: 20px; box-shadow: var(--shadow); padding: 16px;
-      display: flex; flex-direction: column; z-index: 15;
+      display: flex; flex-direction: column; z-index: 10;
     }
-    .tocTitle { margin: 0 0 12px; font-size: 14px; font-weight: 800; color: var(--text); border-bottom: 1px solid var(--cardBorder); padding-bottom: 8px; }
-    .toc { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
-    .toc-group { border-radius: 10px; margin-bottom: 4px; }
-    .toc-sub { display: none; padding-bottom: 4px; }
+    .tocTitle{ margin: 0 0 10px; font-size: 14px; font-weight: 800; color: var(--text); opacity: 0.8; }
+    .toc{ flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+    
+    .toc-group { border-radius: 10px; }
+    .toc-sub { display: none; margin-bottom: 4px; }
     .toc-group.expanded .toc-sub { display: block; }
-    .tocItem {
-      display: block; padding: 8px 12px; border-radius: 8px;
+
+    .tocItem{
+      display: block; padding: 7px 10px; border-radius: 8px;
       color: var(--muted); font-size: 13px; text-decoration: none;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      transition: all 0.2s;
     }
-    .tocItem:hover { background: rgba(15,23,42,.05); color: var(--text); }
-    .tocItem.active { color: var(--accent) !important; font-weight: 700; background: var(--accentBg); }
-    .tocItem.level-post { font-weight: 700; color: var(--text); }
-    .tocItem.level-h2 { padding-left: 24px; font-size: 12.5px; }
+    .tocItem:hover{ background: var(--accentBg); color: var(--accent); }
+    .tocItem.active { color: var(--accent); font-weight: 700; background: var(--accentBg); }
+    .tocItem.level-post{ font-weight: 700; color: var(--text); margin-top: 4px; }
+    .tocItem.level-h2{ padding-left: 20px; font-size: 12.5px; }
+    .tocItem.level-h3{ padding-left: 32px; font-size: 12px; }
 
-    footer { margin-top: 40px; color: var(--muted2); font-size: 12.5px; text-align: center; }
+    .status{ margin: 22px 0; border: 1px dashed var(--cardBorder); background: rgba(15,23,42,.03); border-radius: 14px; padding: 30px; text-align:center; color: var(--muted); }
+    footer{ margin-top: 28px; color: var(--muted2); font-size: 12.5px; text-align:center; }
 
-    @media (max-width: 1420px) { .floatingToc { left: 20px; } }
-    @media (max-width: 1000px) {
-      .mainWrap { padding-left: 0; }
-      .floatingToc { position: static; width: auto; max-height: none; margin: 20px 0; }
+    @media (max-width: 1000px){
+      .mainWrap{ padding-left: 0; }
+      .floatingToc{ display: none; }
     }
   </style>
 </head>
@@ -156,11 +185,12 @@
         </div>
         <div class="actions">
           <button class="btn" id="refreshBtn">🔄 刷新</button>
-          <a class="btn" id="githubBtn" href="#" target="_blank">↗ GitHub</a>
+          <button class="btn" id="themeToggle" title="切换深浅色">🌙</button>
+          <a class="btn" id="githubBtn" href="#" target="_blank" rel="noreferrer">↗ GitHub</a>
         </div>
       </div>
       <div class="searchRow">
-        <input class="search" id="searchInput" placeholder="搜索标题或正文（本地过滤）..." />
+        <input class="search" id="searchInput" placeholder="搜索标题或正文（本地过滤）" />
         <div class="hint" id="countHint">—</div>
       </div>
     </div>
@@ -169,11 +199,11 @@
   <div class="wrap">
     <aside class="floatingToc">
       <h2 class="tocTitle">CONTENTS</h2>
-      <nav id="toc" class="toc"><div class="tocEmpty">加载中...</div></nav>
+      <nav id="toc" class="toc"><div style="font-size:12px;color:var(--muted2)">等待加载...</div></nav>
     </aside>
 
     <main class="mainWrap">
-      <div id="app" class="status" style="text-align:center; padding: 40px; color: var(--muted);">正在从 GitHub 同步数据...</div>
+      <div id="app" class="status">正在同步数据...</div>
       <footer>© <span id="year"></span> · Hosted on GitHub Pages</footer>
     </main>
   </div>
@@ -187,17 +217,17 @@
     const toc = document.getElementById('toc');
     const searchInput = document.getElementById('searchInput');
     const countHint = document.getElementById('countHint');
-    
-    document.getElementById('year').textContent = new Date().getFullYear();
-    document.getElementById('githubBtn').href = `https://github.com/${user}/${repo}/issues`;
-
     let allIssues = [];
     let headingObserver = null;
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+    document.getElementById('githubBtn').href = `https://github.com/${user}/${repo}/issues`;
 
     function fmtDate(iso){ return new Date(iso).toLocaleDateString('zh-CN', { year:'numeric', month:'2-digit', day:'2-digit' }); }
     function escapeHtml(str){ return (str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
     function slugify(str){ return String(str || '').toLowerCase().trim().replace(/[^\w\u4e00-\u9fa5\- ]+/g, '').replace(/\s+/g, '-') || 'sec'; }
 
+    // 目录逻辑
     function attachHeadingIds(){
       app.querySelectorAll('.post').forEach((post) => {
         post.querySelectorAll('.content h2, .content h3').forEach((h, hIdx) => {
@@ -224,7 +254,7 @@
           </div>
         `;
       });
-      toc.innerHTML = html || '<div class="tocEmpty">无目录</div>';
+      toc.innerHTML = html || '<div style="padding:10px; font-size:12px; color:var(--muted2)">暂无目录</div>';
     }
 
     function setActiveToc(id){
@@ -235,7 +265,6 @@
         toc.querySelectorAll('.toc-group').forEach(g => g.classList.remove('expanded'));
         const group = activeLink.closest('.toc-group');
         if (group) group.classList.add('expanded');
-        activeLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       }
     }
 
@@ -245,26 +274,33 @@
       headingObserver = new IntersectionObserver((entries) => {
         const visible = entries.find(e => e.isIntersecting);
         if (visible) setActiveToc(visible.target.id);
-      }, { rootMargin: '-10% 0px -70% 0px' });
+      }, { rootMargin: '-10% 0px -75% 0px' });
       targets.forEach(el => headingObserver.observe(el));
     }
 
+    // 渲染逻辑
     async function render(list){
-      if (!list.length) { app.innerHTML = "未发现匹配内容"; return; }
+      if (!list.length){
+        app.className = "status";
+        app.innerHTML = '还没有内容哦～';
+        countHint.textContent = "0 篇";
+        toc.innerHTML = '';
+        return;
+      }
+
+      app.className = "list";
       app.innerHTML = list.map((item, index) => {
         const postId = `post-${item.number || index}`;
         const title = escapeHtml(item.title);
         const date = fmtDate(item.created_at);
         const body = marked.parse(item.body || '');
-        const link = item.html_url;
-
         return `
           <article class="post" id="${postId}">
             <div class="postHead">
               <h2 class="title"><a href="#${postId}">${title}</a></h2>
               <div class="meta">
                 <span class="pill">📅 ${date}</span>
-                <a class="pill" href="${link}" target="_blank" rel="noreferrer">↗ GitHub</a>
+                <a class="pill" href="${item.html_url}" target="_blank">↗ GitHub</a>
               </div>
             </div>
             <div class="content">${body || '<em>（无正文）</em>'}</div>
@@ -274,19 +310,44 @@
 
       countHint.textContent = `${list.length} 篇`;
       attachHeadingIds();
-      if (window.MathJax?.typesetPromise) await MathJax.typesetPromise([app]);
+      if (window.MathJax?.typesetPromise) {
+        MathJax.typesetClear([app]);
+        await MathJax.typesetPromise([app]);
+      }
       buildTOC();
       setupTOCObserver();
     }
 
     async function loadIssues(){
-      app.innerHTML = "正在同步最新 Issues...";
+      app.className = "status";
+      app.innerHTML = "正在拉取 GitHub Issues...";
       try{
         const res = await fetch(`https://api.github.com/repos/${user}/${repo}/issues?state=open&sort=created&per_page=100`);
         allIssues = (await res.json()).filter(x => !x.pull_request);
         render(allIssues);
-      } catch(e) { app.innerHTML = "数据加载失败，请检查网络或 GitHub 仓库设置。"; }
+      } catch(e) { app.innerHTML = "加载失败，请检查配置或网络"; }
     }
+
+    // 主题切换
+    const themeToggle = document.getElementById('themeToggle');
+    function applyTheme(theme){
+      if (theme === 'dark'){
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeToggle.textContent = '☀️';
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        themeToggle.textContent = '🌙';
+      }
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDark = document.documentElement.hasAttribute('data-theme');
+      const next = isDark ? 'light' : 'dark';
+      localStorage.setItem('qylog_theme', next);
+      applyTheme(next);
+    });
+
+    if (localStorage.getItem('qylog_theme') === 'dark') applyTheme('dark');
 
     document.getElementById('refreshBtn').addEventListener('click', loadIssues);
     searchInput.addEventListener('input', () => {
