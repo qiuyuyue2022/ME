@@ -17,159 +17,173 @@
 
   <style>
     :root{
-      --bg: #f7f8fb;
+      /* 核心色彩 */
+      --bg: #f8fafc;
       --card: #ffffff;
-      --cardBorder: rgba(15,23,42,.10);
-      --text: #0f172a;
-      --muted: rgba(15,23,42,.70);
-      --muted2: rgba(15,23,42,.55);
+      --cardBorder: rgba(15, 23, 42, 0.08);
+      --text: #1e293b;
+      --muted: #64748b;
+      --muted2: #94a3b8;
       --link: #2563eb;
       --accent: #1d4ed8;
-      --accentBg: rgba(29,78,216,.12);
-      --codeBg: rgba(148,163,184,.22);
-      --preBg: rgba(148,163,184,.16);
-      --shadow: 0 10px 25px rgba(2,6,23,.10);
-      --radius: 16px;
+      --accentBg: rgba(37, 99, 235, 0.08);
+      --codeBg: rgba(241, 245, 249, 1);
+      --preBg: #f1f5f9;
+      --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+      --radius: 12px;
       --wrapMax: 1380px;
 
-      /* 目录配置 */
+      /* 字体栈：优先 Mac 优雅字体 */
+      --font-main: "Inter", "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      
+      /* 布局 */
       --tocWidth: 280px;
-      --tocStickyTop: 100px; /* 滚动时距离窗口顶部的距离 */
+      --tocStickyTop: 120px;
     }
 
     html[data-theme="dark"]{
-      --bg: #0b0f14;
-      --card: rgba(255,255,255,.06);
-      --cardBorder: rgba(255,255,255,.10);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.62);
-      --muted2: rgba(255,255,255,.45);
-      --link: #7aa2f7;
-      --accent: #5b8cff;
-      --accentBg: rgba(91,140,255,.14);
-      --codeBg: rgba(255,255,255,.08);
-      --preBg: rgba(255,255,255,.07);
-      --shadow: 0 12px 30px rgba(0,0,0,.35);
+      --bg: #0f172a;
+      --card: #1e293b;
+      --cardBorder: rgba(255, 255, 255, 0.08);
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --muted2: #64748b;
+      --link: #60a5fa;
+      --accent: #3b82f6;
+      --accentBg: rgba(59, 130, 246, 0.12);
+      --codeBg: rgba(30, 41, 59, 0.8);
+      --preBg: #0f172a;
+      --shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
     }
 
-    *{ box-sizing: border-box; }
+    *{ box-sizing: border-box; -webkit-font-smoothing: antialiased; }
     html{ scroll-behavior: smooth; }
     body{
       margin: 0; background: var(--bg); color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
-      line-height: 1.6;
+      font-family: var(--font-main);
+      line-height: 1.75;
     }
 
-    /* 顶部导航 */
+    /* ===== 顶部导航：恢复透明毛玻璃 ===== */
     .topbar{
       position: sticky; top: 0; z-index: 100; 
-      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      padding: 14px 0; border-bottom: 1px solid var(--cardBorder);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      padding: 16px 0;
+      border-bottom: 1px solid var(--cardBorder);
     }
-    html:not([data-theme="dark"]) .topbar{ background: rgba(255,255,255,0.8); }
-    html[data-theme="dark"] .topbar{ background: rgba(11,15,20,0.8); }
+    html:not([data-theme="dark"]) .topbar{ background: rgba(248, 250, 252, 0.75); }
+    html[data-theme="dark"] .topbar{ background: rgba(15, 23, 42, 0.75); }
 
-    .wrap{ max-width: var(--wrapMax); margin: 0 auto; padding: 0 24px; }
+    .wrap{ max-width: var(--wrapMax); margin: 0 auto; padding: 0 30px; }
 
-    .header{ display:flex; align-items:flex-end; justify-content:space-between; gap: 12px; }
-    .brand h1{ margin:0; font-size: 22px; font-weight: 800; }
-    .brand .sub{ margin:4px 0 0; color: var(--muted); font-size: 13px; }
+    .header{ display:flex; align-items:center; justify-content:space-between; gap: 12px; }
+    .brand h1{ margin:0; font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+    .brand .sub{ margin:2px 0 0; color: var(--muted); font-size: 13px; font-weight: 400; }
 
     .btn{
       border: 1px solid var(--cardBorder); background: var(--card); color: var(--text);
-      padding: 8px 16px; border-radius: 999px; font-size: 13px; cursor:pointer;
-      transition: all 0.2s;
+      padding: 6px 14px; border-radius: 8px; font-size: 13px; cursor:pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      font-weight: 500;
     }
-    .btn:hover{ transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .btn:hover{ background: var(--bg); transform: translateY(-1px); }
 
     .searchRow{ margin-top: 16px; display:flex; gap: 12px; align-items:center; }
     .search{
-      flex:1; border: 1px solid var(--cardBorder); background: var(--card);
-      color: var(--text); padding: 12px 16px; border-radius: 12px; outline:none; font-size: 14px;
+      flex:1; border: 1px solid var(--cardBorder); 
+      background: rgba(255, 255, 255, 0.4); 
+      color: var(--text); padding: 10px 16px; border-radius: 10px; outline:none; font-size: 14px;
+      transition: all 0.2s;
+      font-family: var(--font-main);
     }
+    html[data-theme="dark"] .search { background: rgba(30, 41, 59, 0.4); }
+    .search:focus{ background: var(--card); border-color: var(--accent); box-shadow: 0 0 0 3px var(--accentBg); }
 
-    /* 核心布局结构：左目录，右内容 */
+    /* 布局结构 */
     .content-area {
       display: flex;
       align-items: flex-start;
-      gap: 32px;
-      margin-top: 30px;
-      padding-bottom: 60px;
+      gap: 40px;
+      margin-top: 32px;
+      padding-bottom: 80px;
     }
 
-    /* 左侧目录：使用 Sticky 解决遮挡 */
+    /* 左侧目录 */
     .floatingToc{
       position: sticky;
-      top: var(--tocStickyTop); /* 关键：滚动到这里会停住 */
+      top: var(--tocStickyTop);
       width: var(--tocWidth);
       flex-shrink: 0;
-      max-height: calc(100vh - 140px);
-      border: 1px solid var(--cardBorder);
-      background: var(--card);
-      border-radius: 20px;
-      box-shadow: var(--shadow);
-      padding: 20px 14px;
+      max-height: calc(100vh - 160px);
+      background: transparent;
+      padding: 0 10px 0 0;
       overflow-y: auto;
       z-index: 10;
     }
 
-    .tocTitle{ margin: 0 0 16px 8px; font-size: 14px; font-weight: 800; letter-spacing: 1px; }
-    .toc{ display: flex; flex-direction: column; gap: 4px; }
+    .tocTitle{ 
+      margin: 0 0 16px 12px; font-size: 11px; font-weight: 700; 
+      color: var(--muted2); text-transform: uppercase; letter-spacing: 1.5px; 
+    }
+    .toc{ display: flex; flex-direction: column; gap: 2px; }
 
-    /* 折叠逻辑 */
-    .toc-group { border-radius: 12px; margin-bottom: 2px; }
-    .toc-sub { display: none; margin: 4px 0 8px; }
-    .toc-group.expanded { background: rgba(0,0,0,0.02); }
-    html[data-theme="dark"] .toc-group.expanded { background: rgba(255,255,255,0.03); }
+    /* 目录折叠逻辑 */
+    .toc-group { border-radius: 8px; margin-bottom: 2px; }
+    .toc-sub { display: none; margin: 2px 0 6px; }
     .toc-group.expanded .toc-sub { display: block; }
 
     .tocItem{
-      display: block; padding: 8px 12px; border-radius: 8px;
+      display: block; padding: 6px 12px; border-radius: 6px;
       color: var(--muted); font-size: 13px; text-decoration: none;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      transition: 0.2s;
+      transition: all 0.15s;
     }
-    .tocItem:hover{ background: rgba(0,0,0,0.05); color: var(--text); }
-    .tocItem.active { color: var(--accent) !important; font-weight: 700; }
-    .tocItem.level-post{ font-weight: 600; color: var(--text); }
+    .tocItem:hover{ color: var(--accent); background: var(--accentBg); }
+    .tocItem.active { color: var(--accent) !important; font-weight: 600; background: var(--accentBg); }
+    .tocItem.level-post{ font-weight: 500; color: var(--text); }
     .tocItem.level-h2{ padding-left: 24px; font-size: 12.5px; opacity: 0.8; }
     .tocItem.level-h3{ padding-left: 36px; font-size: 12px; opacity: 0.7; }
 
-    /* 右侧主内容：增加 min-width 防止图片撑破 */
-    .mainWrap{
-      flex: 1;
-      min-width: 0; /* 极其重要：防止内部大元素（如图片）撑开 flex 容器 */
-    }
+    /* 右侧正文 */
+    .mainWrap{ flex: 1; min-width: 0; }
 
     .post{
       border: 1px solid var(--cardBorder); background: var(--card);
       border-radius: var(--radius); box-shadow: var(--shadow);
-      margin-bottom: 30px; overflow:hidden; scroll-margin-top: 120px;
+      margin-bottom: 40px; overflow:hidden; scroll-margin-top: 130px;
     }
-    .postHead{ padding: 24px 24px 16px; border-bottom: 1px solid var(--cardBorder); }
-    .title{ margin:0; font-size: 22px; font-weight: 800; line-height: 1.4; }
+    .postHead{ padding: 28px 30px 20px; border-bottom: 1px solid var(--cardBorder); }
+    .title{ 
+      margin:0; font-size: 24px; font-weight: 700; line-height: 1.3; 
+      letter-spacing: -0.5px; color: var(--text);
+    }
+    .title a { color: inherit; text-decoration: none; }
     
-    .content{ padding: 24px; font-size: 16px; color: var(--text); }
-    .content h2, .content h3 { scroll-margin-top: 120px; margin-top: 1.5em; }
+    .content{ padding: 30px; font-size: 16px; color: var(--text); }
+    .content h2{ font-size: 20px; font-weight: 700; margin: 1.8em 0 1em; scroll-margin-top: 130px; border-bottom: 1px solid var(--cardBorder); padding-bottom: 0.3em;}
+    .content h3{ font-size: 17px; font-weight: 700; margin: 1.5em 0 0.8em; scroll-margin-top: 130px; }
     
-    /* 彻底修复图片过大问题 */
     .content img { 
-      max-width: 100% !important; 
-      height: auto !important; 
-      border-radius: 12px; 
-      margin: 16px 0;
-      display: block;
+      max-width: 100% !important; height: auto !important; 
+      border-radius: 8px; margin: 24px 0; display: block;
+      box-shadow: 0 10px 30px -10px rgba(0,0,0,0.1);
     }
     
-    .content pre{ background: var(--preBg); padding: 18px; border-radius: 14px; overflow:auto; border: 1px solid var(--cardBorder); }
-    .content code{ background: var(--codeBg); padding: 0.2em 0.4em; border-radius: 6px; font-size: 0.9em; }
+    .content pre{ 
+      background: var(--preBg); padding: 20px; border-radius: 10px; 
+      overflow:auto; border: 1px solid var(--cardBorder); margin: 1.5em 0;
+    }
+    .content code{ 
+      background: var(--codeBg); padding: 0.2em 0.4em; 
+      border-radius: 4px; font-size: 0.9em; font-family: "SF Mono", Menlo, monospace;
+    }
 
-    footer{ margin-top: 40px; color: var(--muted2); font-size: 12px; text-align:center; padding-bottom: 40px; }
+    footer{ margin-top: 60px; color: var(--muted2); font-size: 12px; text-align:center; padding-bottom: 60px; }
 
-    /* 移动端适配 */
     @media (max-width: 900px){
       .content-area { flex-direction: column; }
-      .floatingToc { position: relative; top: 0; width: 100%; max-height: 300px; margin-bottom: 24px; }
+      .floatingToc { position: relative; top: 0; width: 100%; max-height: 250px; margin-bottom: 30px; }
       .mainWrap { width: 100%; }
     }
   </style>
@@ -184,27 +198,27 @@
           <p class="sub">我们一起用2年的时间，看看我们会走向哪里</p>
         </div>
         <div class="actions">
-          <button class="btn" id="refreshBtn">🔄 刷新数据</button>
+          <button class="btn" id="refreshBtn">刷新数据</button>
           <button class="btn" id="themeToggle">🌙</button>
-          <a class="btn" id="githubBtn" href="#" target="_blank">↗ GitHub</a>
+          <a class="btn" id="githubBtn" href="#" target="_blank">GitHub</a>
         </div>
       </div>
       <div class="searchRow">
         <input class="search" id="searchInput" placeholder="搜索关键词..." />
-        <div style="font-size:13px; color:var(--muted); min-width:40px" id="countHint">—</div>
+        <div style="font-size:12px; color:var(--muted); min-width:40px; text-align:right" id="countHint">—</div>
       </div>
     </div>
   </nav>
 
   <div class="wrap content-area">
     <aside class="floatingToc">
-      <h2 class="tocTitle">CONTENTS</h2>
-      <nav id="toc" class="toc"><div style="padding:20px; color:var(--muted)">加载目录中...</div></nav>
+      <h2 class="tocTitle">Index</h2>
+      <nav id="toc" class="toc"><div style="padding:12px; color:var(--muted2); font-size:12px">Loading index...</div></nav>
     </aside>
 
     <main class="mainWrap">
-      <div id="app">正在同步 GitHub 内容...</div>
-      <footer>© <span id="year"></span> · Designed for Research & Thoughts</footer>
+      <div id="app">正在同步内容...</div>
+      <footer>© <span id="year"></span> · Designed for Research & Clarity</footer>
     </main>
   </div>
 
@@ -254,7 +268,7 @@
           </div>
         `;
       });
-      toc.innerHTML = html || '<div style="padding:20px">暂无目录</div>';
+      toc.innerHTML = html || '<div style="padding:12px">No Index</div>';
     }
 
     function setActiveToc(id){
@@ -265,7 +279,6 @@
         toc.querySelectorAll('.toc-group').forEach(g => g.classList.remove('expanded'));
         const group = activeLink.closest('.toc-group');
         if (group) group.classList.add('expanded');
-        activeLink.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       }
     }
 
@@ -275,19 +288,21 @@
       headingObserver = new IntersectionObserver((entries) => {
         const visible = entries.find(e => e.isIntersecting);
         if (visible) setActiveToc(visible.target.id);
-      }, { rootMargin: '-120px 0px -70% 0px' });
+      }, { rootMargin: '-140px 0px -70% 0px' });
       targets.forEach(el => headingObserver.observe(el));
     }
 
     async function render(list){
-      if (!list || !list.length) { app.innerHTML = '<div style="padding:40px; text-align:center">未发现相关内容</div>'; return; }
+      if (!list || !list.length) { app.innerHTML = '<div style="padding:60px; text-align:center; color:var(--muted)">未找到相关记录</div>'; return; }
       app.innerHTML = list.map((item, index) => {
         const postId = `post-${item.number || index}`;
         return `
           <article class="post" id="${postId}">
             <div class="postHead">
-              <h2 class="title"><a style="color:inherit" href="#${postId}">${escapeHtml(item.title)}</a></h2>
-              <div style="font-size:12px; color:var(--muted); margin-top:10px">最后更新于 ${fmtDate(item.updated_at || item.created_at)}</div>
+              <h2 class="title"><a href="#${postId}">${escapeHtml(item.title)}</a></h2>
+              <div style="font-size:12px; color:var(--muted2); margin-top:8px; font-weight:500">
+                ${fmtDate(item.updated_at || item.created_at)}
+              </div>
             </div>
             <div class="content">${marked.parse(item.body || '')}</div>
           </article>
@@ -302,7 +317,7 @@
     }
 
     async function loadIssues(){
-      app.innerHTML = '<div style="padding:40px; text-align:center">正在与服务器通讯...</div>';
+      app.innerHTML = '<div style="padding:60px; text-align:center; color:var(--muted)">读取数据中...</div>';
       try{
         const url = `https://api.github.com/repos/${user}/${repo}/issues?state=open&sort=created&per_page=100`;
         const res = await fetch(url);
@@ -310,12 +325,9 @@
         const data = await res.json();
         allIssues = data.filter(x => !x.pull_request);
         render(allIssues);
-      } catch(e) { 
-        app.innerHTML = '<div style="padding:40px; text-align:center; color:#ef4444">加载失败，请检查网络或 GitHub 仓库设置</div>'; 
-      }
+      } catch(e) { app.innerHTML = '<div style="padding:60px; text-align:center; color:red">数据连接失败</div>'; }
     }
 
-    // 主题切换
     const themeToggle = document.getElementById('themeToggle');
     themeToggle.addEventListener('click', () => {
       const isDark = document.documentElement.toggleAttribute('data-theme');
