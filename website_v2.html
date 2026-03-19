@@ -6,7 +6,6 @@
   <title>QiuYuyue · Log</title>
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
   <script>
     window.MathJax = {
       tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] },
@@ -16,8 +15,7 @@
   <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
   <style>
-    /* 还原：核心变量 */
-    :root{
+    :root {
       --bg: #f7f8fb;
       --card: #ffffff;
       --cardBorder: rgba(15,23,42,.10);
@@ -30,133 +28,120 @@
       --codeBg: rgba(148,163,184,.22);
       --preBg: rgba(148,163,184,.16);
       --shadow: 0 10px 25px rgba(2,6,23,.10);
-      --radius: 16px; /* 还原 16px */
+      --radius: 16px;
       --wrapMax: 1380px;
 
-      /* 目录配置：左侧 */
-      --tocWidth: 290px;
-      --tocLeft: 24px;
-      --tocTop: 180px; /* 调大此值，避开顶部搜索栏遮挡 */
-      --mainLeftGap: 330px; 
+      /* 布局配置 */
+      --tocWidth: 280px;
+      --tocLeft: 30px;
+      --tocTop: 160px; 
+      --mainLeftGap: 340px; 
     }
 
-    html[data-theme="dark"]{
-      --bg: #0b0f14;
-      --card: rgba(255,255,255,.06);
-      --cardBorder: rgba(255,255,255,.10);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.62);
-      --muted2: rgba(255,255,255,.45);
-      --link: #7aa2f7;
-      --accent: #5b8cff;
-      --accentBg: rgba(91,140,255,.14);
-      --codeBg: rgba(255,255,255,.08);
-      --preBg: rgba(255,255,255,.07);
-      --shadow: 0 12px 30px rgba(0,0,0,.35);
-    }
-
-    *{ box-sizing: border-box; }
-    html{ scroll-behavior: smooth; }
-    
-    /* 还原：背景渐变和字体 */
-    body{
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
       margin: 0;
       background: radial-gradient(1200px 800px at 50% -20%, rgba(255,255,255,0.04), transparent 60%), var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
     }
 
-    a{ color: var(--link); text-decoration: none; }
-    a:hover{ text-decoration: underline; }
+    a { color: var(--link); text-decoration: none; transition: 0.2s; }
+    a:hover { text-decoration: underline; opacity: 0.8; }
 
-    .wrap{ max-width: var(--wrapMax); margin: 0 auto; padding: 18px 20px 60px; position: relative; }
+    .wrap { max-width: var(--wrapMax); margin: 0 auto; padding: 18px 20px 60px; position: relative; }
 
-    .topbar{
-      position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); padding: 14px 0 10px;
+    /* 顶部栏：修复搜索框下方空白 */
+    .topbar {
+      position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px); 
+      padding: 14px 0 2px; /* 压缩底部 padding */
+      background: linear-gradient(to bottom, rgba(255,255,255,.80), rgba(255,255,255,0));
     }
-    html:not([data-theme="dark"]) .topbar{ background: linear-gradient(to bottom, rgba(255,255,255,.82), rgba(255,255,255,0)); }
-    html[data-theme="dark"] .topbar{ background: linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,0)); }
+    .topbar .wrap { padding-bottom: 0px !important; } /* 强制消除 60px 间距 */
 
-    .header{ display:flex; align-items:flex-end; justify-content:space-between; gap: 12px; }
-    .brand h1{ margin:0; font-size: 22px; font-weight: 780; }
-    .brand .sub{ margin:0; color: var(--muted); font-size: 13.5px; }
-    .actions{ display:flex; gap:10px; align-items:center; }
+    .header { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+    .brand h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+    .brand .sub { margin: 4px 0 0; color: var(--muted); font-size: 13.5px; }
 
-    .btn{
+    .btn {
       border: 1px solid var(--cardBorder); background: var(--card); color: var(--text);
-      padding: 9px 12px; border-radius: 999px; font-size: 13px; cursor:pointer;
-      box-shadow: 0 6px 16px rgba(0,0,0,.10); transition: all .12s ease;
+      padding: 8px 14px; border-radius: 999px; font-size: 13px; cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,.05); transition: all .15s ease;
     }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0,0,0,.10); }
 
-    .searchRow{ margin-top: 14px; display:flex; gap: 10px; align-items:center; }
-    .search{
-      flex:1; border: 1px solid var(--cardBorder); background: var(--card);
-      color: var(--text); padding: 12px 14px; border-radius: 14px; outline:none;
-      box-shadow: var(--shadow); font-size: 14px;
+    .searchRow { margin-top: 14px; display: flex; gap: 10px; align-items: center; padding-bottom: 10px; }
+    .search {
+      flex: 1; border: 1px solid var(--cardBorder); background: var(--card);
+      color: var(--text); padding: 12px 16px; border-radius: 14px; outline: none;
+      box-shadow: var(--shadow); font-size: 14px; transition: border 0.2s;
     }
+    .search:focus { border-color: var(--link); }
+    .hint { color: var(--muted2); font-size: 12.5px; white-space: nowrap; }
 
-    /* 布局：左侧留白 */
-    .mainWrap{ padding-left: var(--mainLeftGap); margin-top: 18px; }
+    /* 正文容器 */
+    .mainWrap { padding-left: var(--mainLeftGap); margin-top: 10px; }
 
-    .post{
+    .post {
       border: 1px solid var(--cardBorder); background: var(--card);
       border-radius: var(--radius); box-shadow: var(--shadow);
-      overflow:hidden; scroll-margin-top: 108px; margin-bottom: 16px;
+      overflow: hidden; scroll-margin-top: 100px; margin-bottom: 24px;
     }
 
-    /* 还原：原有的 Padding 和字号 */
-    .postHead{ padding: 18px 18px 12px; border-bottom: 1px solid var(--cardBorder); }
-    .title{ margin:0; font-size: 19px; font-weight: 760; color: var(--text); }
-    .content{ padding: 14px 18px 18px; font-size: 15px; line-height: 1.8; }
+    .postHead { padding: 20px 24px 14px; border-bottom: 1px solid rgba(15,23,42,.06); }
+    .title { margin: 0; font-size: 20px; font-weight: 760; line-height: 1.4; color: var(--text); }
     
-    .content img { max-width: 100%; height: auto !important; border-radius: 12px; margin: 12px 0; display: block; }
-    .content pre{ background: var(--preBg); padding: 14px; border-radius: 14px; overflow:auto; }
-    .content code{ background: var(--codeBg); padding: .15em .45em; border-radius: 8px; font-size: 0.92em; }
-
-    /* ===== 左侧折叠目录 ===== */
-    .floatingToc{
-      position: fixed;
-      left: calc((100vw - var(--wrapMax)) / 2 + var(--tocLeft));
-      top: var(--tocTop);
-      width: var(--tocWidth);
-      max-height: calc(100vh - var(--tocTop) - 40px);
-      border: 1px solid var(--cardBorder);
-      background: var(--card);
-      border-radius: 18px;
-      box-shadow: var(--shadow);
-      padding: 14px;
-      display: flex;
-      flex-direction: column;
-      z-index: 15;
+    .meta { margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px;
+      border-radius: 999px; border: 1px solid var(--cardBorder);
+      background: rgba(15,23,42,.03); color: var(--muted); font-size: 12px;
     }
 
-    @media (max-width: 1420px) { .floatingToc { left: var(--tocLeft); } }
+    .content { padding: 16px 24px 24px; font-size: 15.5px; line-height: 1.8; color: #334155; }
+    .content h2, .content h3 { color: var(--text); margin: 24px 0 12px; }
+    .content p { margin: 12px 0; }
+    .content blockquote {
+      margin: 16px 0; padding: 12px 16px; border-left: 4px solid var(--accent);
+      background: var(--accentBg); border-radius: 8px; color: var(--text);
+    }
+    .content pre { background: var(--preBg); padding: 16px; border-radius: 12px; overflow: auto; border: 1px solid var(--cardBorder); }
+    .content code { background: var(--codeBg); padding: .2em .4em; border-radius: 6px; font-size: 0.9em; font-family: monospace; }
+    .content table { width: 100%; border-collapse: collapse; margin: 16px 0; border: 1px solid var(--cardBorder); border-radius: 8px; overflow: hidden; }
+    .content th, .content td { padding: 10px 14px; border-bottom: 1px solid var(--cardBorder); text-align: left; }
+    .content th { background: rgba(15,23,42,.04); font-size: 13px; color: var(--muted); }
 
-    .tocTitle{ margin: 0 0 8px; font-size: 14px; font-weight: 760; color: var(--text); }
-    .toc{ flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
-
-    /* 折叠逻辑样式 */
-    .toc-group { border-radius: 10px; transition: background 0.2s; }
-    .toc-sub { display: none; margin-bottom: 4px; }
-    .toc-group.expanded .toc-sub { display: block; } /* 活跃时展开子目录 */
-
-    .tocItem{
-      display: block; padding: 7px 10px; border-radius: 10px;
+    /* 左侧目录样式 */
+    .floatingToc {
+      position: fixed; left: calc((100vw - var(--wrapMax)) / 2 + var(--tocLeft));
+      top: var(--tocTop); width: var(--tocWidth);
+      max-height: calc(100vh - var(--tocTop) - 40px);
+      border: 1px solid var(--cardBorder); background: var(--card);
+      border-radius: 20px; box-shadow: var(--shadow); padding: 16px;
+      display: flex; flex-direction: column; z-index: 15;
+    }
+    .tocTitle { margin: 0 0 12px; font-size: 14px; font-weight: 800; color: var(--text); border-bottom: 1px solid var(--cardBorder); padding-bottom: 8px; }
+    .toc { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+    .toc-group { border-radius: 10px; margin-bottom: 4px; }
+    .toc-sub { display: none; padding-bottom: 4px; }
+    .toc-group.expanded .toc-sub { display: block; }
+    .tocItem {
+      display: block; padding: 8px 12px; border-radius: 8px;
       color: var(--muted); font-size: 13px; text-decoration: none;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .tocItem:hover{ background: rgba(15,23,42,.05); color: var(--text); }
-    
-    .tocItem.active { color: var(--accent) !important; font-weight: 700; }
-    .tocItem.level-post{ font-weight: 700; color: var(--text); margin-top: 4px; }
-    .tocItem.level-h2{ padding-left: 20px; font-size: 12.5px; }
-    .tocItem.level-h3{ padding-left: 32px; font-size: 12px; }
+    .tocItem:hover { background: rgba(15,23,42,.05); color: var(--text); }
+    .tocItem.active { color: var(--accent) !important; font-weight: 700; background: var(--accentBg); }
+    .tocItem.level-post { font-weight: 700; color: var(--text); }
+    .tocItem.level-h2 { padding-left: 24px; font-size: 12.5px; }
 
-    footer{ margin-top: 28px; color: var(--muted2); font-size: 12.5px; text-align:center; }
+    footer { margin-top: 40px; color: var(--muted2); font-size: 12.5px; text-align: center; }
 
-    @media (max-width: 900px){
-      .mainWrap{ padding-left: 0; }
-      .floatingToc{ position: static; width: auto; max-height: none; margin: 18px 0; }
+    @media (max-width: 1420px) { .floatingToc { left: 20px; } }
+    @media (max-width: 1000px) {
+      .mainWrap { padding-left: 0; }
+      .floatingToc { position: static; width: auto; max-height: none; margin: 20px 0; }
     }
   </style>
 </head>
@@ -171,12 +156,11 @@
         </div>
         <div class="actions">
           <button class="btn" id="refreshBtn">🔄 刷新</button>
-          <button class="btn" id="themeToggle">🌙</button>
           <a class="btn" id="githubBtn" href="#" target="_blank">↗ GitHub</a>
         </div>
       </div>
       <div class="searchRow">
-        <input class="search" id="searchInput" placeholder="搜索标题或正文..." />
+        <input class="search" id="searchInput" placeholder="搜索标题或正文（本地过滤）..." />
         <div class="hint" id="countHint">—</div>
       </div>
     </div>
@@ -184,12 +168,12 @@
 
   <div class="wrap">
     <aside class="floatingToc">
-      <h2 class="tocTitle">目录</h2>
+      <h2 class="tocTitle">CONTENTS</h2>
       <nav id="toc" class="toc"><div class="tocEmpty">加载中...</div></nav>
     </aside>
 
     <main class="mainWrap">
-      <div id="app" class="status">正在同步...</div>
+      <div id="app" class="status" style="text-align:center; padding: 40px; color: var(--muted);">正在从 GitHub 同步数据...</div>
       <footer>© <span id="year"></span> · Hosted on GitHub Pages</footer>
     </main>
   </div>
@@ -266,16 +250,24 @@
     }
 
     async function render(list){
-      if (!list.length) { app.innerHTML = "未发现内容"; return; }
+      if (!list.length) { app.innerHTML = "未发现匹配内容"; return; }
       app.innerHTML = list.map((item, index) => {
         const postId = `post-${item.number || index}`;
+        const title = escapeHtml(item.title);
+        const date = fmtDate(item.created_at);
+        const body = marked.parse(item.body || '');
+        const link = item.html_url;
+
         return `
           <article class="post" id="${postId}">
             <div class="postHead">
-              <h2 class="title"><a href="#${postId}">${escapeHtml(item.title)}</a></h2>
-              <div style="font-size:12.5px; color:var(--muted); margin-top:8px">📅 ${fmtDate(item.created_at)}</div>
+              <h2 class="title"><a href="#${postId}">${title}</a></h2>
+              <div class="meta">
+                <span class="pill">📅 ${date}</span>
+                <a class="pill" href="${link}" target="_blank" rel="noreferrer">↗ GitHub</a>
+              </div>
             </div>
-            <div class="content">${marked.parse(item.body || '')}</div>
+            <div class="content">${body || '<em>（无正文）</em>'}</div>
           </article>
         `;
       }).join('');
@@ -288,20 +280,13 @@
     }
 
     async function loadIssues(){
-      app.innerHTML = "正在加载...";
+      app.innerHTML = "正在同步最新 Issues...";
       try{
         const res = await fetch(`https://api.github.com/repos/${user}/${repo}/issues?state=open&sort=created&per_page=100`);
         allIssues = (await res.json()).filter(x => !x.pull_request);
         render(allIssues);
-      } catch(e) { app.innerHTML = "数据加载失败"; }
+      } catch(e) { app.innerHTML = "数据加载失败，请检查网络或 GitHub 仓库设置。"; }
     }
-
-    const themeToggle = document.getElementById('themeToggle');
-    themeToggle.addEventListener('click', () => {
-      const isDark = document.documentElement.toggleAttribute('data-theme');
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    });
-    if (localStorage.getItem('theme') === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
 
     document.getElementById('refreshBtn').addEventListener('click', loadIssues);
     searchInput.addEventListener('input', () => {
