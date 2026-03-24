@@ -43,20 +43,6 @@
       --mainLeftGap: 320px; 
     }
 
-    html[data-theme="dark"]{
-      --bg: #0b0f14;
-      --card: rgba(255,255,255,.06);
-      --cardBorder: rgba(255,255,255,.10);
-      --text: rgba(255,255,255,.92);
-      --muted: rgba(255,255,255,.62);
-      --muted2: rgba(255,255,255,.45);
-      --link: #7aa2f7;
-      --accent: #5b8cff;
-      --accentBg: rgba(91,140,255,.14);
-      --codeBg: rgba(255,255,255,.08);
-      --preBg: rgba(255,255,255,.07);
-      --shadow: 0 12px 30px rgba(0,0,0,.35);
-    }
 
     *{ box-sizing: border-box; }
     html{ scroll-behavior: smooth; }
@@ -77,12 +63,16 @@
       position: relative;
     }
 
-    /* 顶部栏：修复搜索栏下方空白 */
+    /* 顶部栏 */
     .topbar{
-      position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px);
-      padding: 14px 0 2px; /* 减小底部 padding */
+      position: relative;
+      z-index: 1;
+      padding: 14px 0 10px;
     }
-    .topbar .wrap { padding-bottom: 10px !important; } /* 关键修复：强制去掉导航栏内的 60px 留白 */
+    
+    .topbar .wrap{
+      padding-bottom: 18px;
+    }
 
     html:not([data-theme="dark"]) .topbar{ background: linear-gradient(to bottom, rgba(255,255,255,.75), rgba(255,255,255,0)); }
     html[data-theme="dark"] .topbar{ background: linear-gradient(to bottom, rgba(0,0,0,.35), rgba(0,0,0,0)); }
@@ -191,8 +181,7 @@
         </div>
         <div class="actions">
           <button class="btn" id="refreshBtn">🔄 刷新</button>
-          <button class="btn" id="themeToggle" title="切换深浅色">🌙</button>
-          <a class="btn" id="githubBtn" href="#" target="_blank" rel="noreferrer">↗ GitHub</a>
+          <a class="btn" id="githubBtn" href="#" target="_blank" rel="noreferrer">GitHub</a>
         </div>
       </div>
       <div class="searchRow">
@@ -330,7 +319,14 @@
       countHint.textContent = "—";
     
       try{
-        const res = await fetch(`https://api.github.com/repos/${user}/${repo}/issues?state=open&sort=created&per_page=100`);
+        const res = await fetch(`https://api.github.com/repos/${user}/${repo}/issues?state=open&sort=created&direction=desc&per_page=100`, {
+          method: 'GET',
+          mode: 'cors',
+          cache: 'no-store',
+          headers: {
+            'Accept': 'application/vnd.github+json'
+          }
+        });
         const data = await res.json();
     
         if (!Array.isArray(data)) {
@@ -346,28 +342,8 @@
       }
     }
 
-    // 主题切换
-    const themeToggle = document.getElementById('themeToggle');
-    function applyTheme(theme){
-      if (theme === 'dark'){
-        document.documentElement.setAttribute('data-theme', 'dark');
-        themeToggle.textContent = '☀️';
-      } else {
-        document.documentElement.removeAttribute('data-theme');
-        themeToggle.textContent = '🌙';
-      }
-    }
-
-    themeToggle.addEventListener('click', () => {
-      const isDark = document.documentElement.hasAttribute('data-theme');
-      const next = isDark ? 'light' : 'dark';
-      localStorage.setItem('qylog_theme', next);
-      applyTheme(next);
-    });
-
-    if (localStorage.getItem('qylog_theme') === 'dark') applyTheme('dark');
-
-    document.getElementById('refreshBtn').addEventListener('click', loadIssues);
+    document.getElementById('refreshBtn').addEventListener('click', () => loadIssues(true));
+    
     searchInput.addEventListener('input', async () => {
       const q = (searchInput.value || '').toLowerCase();
     
@@ -379,8 +355,26 @@
     
       await render(filtered);
     });
-
-    loadIssues();
+    
+    let hasInitialized = false;
+    
+    function initLoad(){
+      if (hasInitialized) return;
+      hasInitialized = true;
+      loadIssues();
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initLoad, { once: true });
+    } else {
+      initLoad();
+    }
+    
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) {
+        loadIssues(true);
+      }
+    });
   </script>
 </body>
 </html>
