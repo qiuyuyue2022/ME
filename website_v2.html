@@ -64,7 +64,6 @@
       margin: 0;
       background: radial-gradient(1200px 800px at 50% -20%, rgba(255,255,255,0.04), transparent 60%), var(--bg);
       color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     a{ color: var(--link); text-decoration: none; }
@@ -321,11 +320,23 @@
     async function loadIssues(){
       app.className = "status";
       app.innerHTML = "正在拉取 GitHub Issues...";
+      countHint.textContent = "—";
+    
       try{
         const res = await fetch(`https://api.github.com/repos/${user}/${repo}/issues?state=open&sort=created&per_page=100`);
-        allIssues = (await res.json()).filter(x => !x.pull_request);
-        render(allIssues);
-      } catch(e) { app.innerHTML = "加载失败，请检查配置或网络"; }
+        const data = await res.json();
+    
+        if (!Array.isArray(data)) {
+          throw new Error('Bad response');
+        }
+    
+        allIssues = data.filter(x => !x.pull_request);
+        await render(allIssues);
+      } catch(e) {
+        app.className = "status";
+        app.innerHTML = "加载失败，请检查网络、仓库名，或是否触发 GitHub API 频率限制。";
+        toc.innerHTML = '<div style="font-size:12px;color:var(--muted2)">目录不可用</div>';
+      }
     }
 
     // 主题切换
@@ -350,9 +361,16 @@
     if (localStorage.getItem('qylog_theme') === 'dark') applyTheme('dark');
 
     document.getElementById('refreshBtn').addEventListener('click', loadIssues);
-    searchInput.addEventListener('input', () => {
-      const q = searchInput.value.toLowerCase();
-      render(allIssues.filter(it => it.title.toLowerCase().includes(q) || it.body.toLowerCase().includes(q)));
+    searchInput.addEventListener('input', async () => {
+      const q = (searchInput.value || '').toLowerCase();
+    
+      const filtered = allIssues.filter(it => {
+        const title = (it.title || '').toLowerCase();
+        const body = (it.body || '').toLowerCase();
+        return title.includes(q) || body.includes(q);
+      });
+    
+      await render(filtered);
     });
 
     loadIssues();
